@@ -1,34 +1,3 @@
-// const express = require('express');
-// const router = express.Router();
-// const upload = require('./multer')
-// const {
-//     createBlog,
-//     getBlogs,
-//     getBlogById,
-//     updateBlog,
-//     deleteBlog,
-//     createComment,
-//     getCommentsByBlogId,
-//     updateLike,
-//     uploadImageToBlog
-// } = require('./controller/BlogController');
-// const validateAuth = require('./middleware/validateAuth');
-// const validateInput = require('./middleware/validateInput');
-
-// // Routes for blog
-// router.post('/blogs', validateAuth, validateInput, createBlog);
-// router.post('/blogs/:id/image', upload, uploadImageToBlog);
-// router.get('/blogs', getBlogs);
-// router.get('/blogs/:id', getBlogById);
-// router.patch('/blogs/:id', validateAuth, validateInput, updateBlog); 
-// router.delete('/blogs/:id', validateAuth, deleteBlog);
-
-// // Routes for comments
-// router.post('/blogs/:blog_id/comments', validateAuth, createComment);
-// router.get('/blogs/:blog_id/comments', getCommentsByBlogId);
-// router.patch('/comments/:comment_id/like', updateLike);
-
-// module.exports = router;
 
 
 const express = require('express');
