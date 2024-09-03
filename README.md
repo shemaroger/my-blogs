@@ -1,0 +1,3 @@
+[![Coverage Status](https://coveralls.io/repos/github/shemaroger/my-blogs/badge.svg?branch=main)](https://coveralls.io/github/shemaroger/my-blogs?branch=main)
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Jey7YadcoZ7ocdKkWs6ztv/HGQ6ZfhygFgEBunwJfTrJG/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/Jey7YadcoZ7ocdKkWs6ztv/HGQ6ZfhygFgEBunwJfTrJG/tree/main)
