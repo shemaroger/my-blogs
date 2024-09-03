@@ -120,10 +120,10 @@ app.use('/api', routes2);
 
 // Swagger documentation route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+const dbs ='mongodb+srv://shemaroger:12345@cluster0.ksdq0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 // Connect to MongoDB and start the server
 if (process.env.NODE_ENV !== 'test') {
-    mongoose.connect("mongodb://localhost:27017/blog")
+    mongoose.connect(dbs)
     .then(() => {
         app.listen(5000, () => {
             console.log("Server has started on port 5000!");
