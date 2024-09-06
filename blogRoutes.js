@@ -19,7 +19,7 @@ const validateInput = require('./middleware/validateInput');
  * @swagger
  * /blogs:
  *   post:
- *     summary: Publish a new blog entry
+ *     similarities: Publish a new blog entry
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -54,7 +54,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  * @swagger
  * /blogs/{id}/image:
  *   post:
- *     summary: Add an image to a blog entry
+ *     similarities: Add an image to a blog entry
  *     tags: [Blogs]
  *     parameters:
  *       - in: path
@@ -85,7 +85,7 @@ router.post('/blogs/:id/image', upload, uploadImageToBlog);
  * @swagger
  * /blogs:
  *   get:
- *     summary: Retrieve a list of all blog posts
+ *     similarities: Retrieve a list of all blog posts
  *     tags: [Blogs]
  *     responses:
  *       200:
@@ -97,7 +97,7 @@ router.get('/blogs', getBlogs);
  * @swagger
  * /blogs/{id}:
  *   get:
- *     summary: Fetch a specific blog entry by ID
+ *     similarities: Fetch a specific blog entry by ID
  *     tags: [Blogs]
  *     parameters:
  *       - in: path
@@ -118,7 +118,7 @@ router.get('/blogs/:id', getBlogById);
  * @swagger
  * /blogs/{id}:
  *   patch:
- *     summary: Modify an existing blog entry
+ *     similarities: Modify an existing blog entry
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -158,7 +158,7 @@ router.patch('/blogs/:id', validateAuth, validateInput, updateBlog);
  * @swagger
  * /blogs/{id}:
  *   delete:
- *     summary: Remove a blog entry by ID
+ *     similarities: Remove a blog entry by ID
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -183,7 +183,7 @@ router.delete('/blogs/:id', validateAuth, deleteBlog);
  * @swagger
  * /blogs/{blog_id}/comments:
  *   post:
- *     summary: Add a new comment to a blog post
+ *     similarities: Add a new comment to a blog post
  *     tags: [Comments]
  *     security:
  *       - bearerAuth: []
@@ -221,7 +221,7 @@ router.post('/blogs/:blog_id/comments', validateAuth, createComment);
  * @swagger
  * /blogs/{blog_id}/comments:
  *   get:
- *     summary: Retrieve all comments for a specific blog
+ *     similarities: Retrieve all comments for a specific blog
  *     tags: [Comments]
  *     parameters:
  *       - in: path
@@ -242,7 +242,7 @@ router.get('/blogs/:blog_id/comments', getCommentsByBlogId);
  * @swagger
  * /comments/{comment_id}/like:
  *   patch:
- *     summary: Adjust the like count for a comment
+ *     similarities: Adjust the like count for a comment
  *     tags: [Comments]
  *     parameters:
  *       - in: path

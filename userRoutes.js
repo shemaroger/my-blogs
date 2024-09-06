@@ -6,7 +6,7 @@ const { createUser, loginUser } = require('./controller/userController');
  * @swagger
  * /users:
  *   post:
- *     summary: Register a new account
+ *     summary: Create a new user account
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -26,9 +26,9 @@ const { createUser, loginUser } = require('./controller/userController');
  *                 format: password
  *     responses:
  *       201:
- *         description: Account created successfully.
+ *         description: User account successfully created.
  *       400:
- *         description: The provided data is not valid.
+ *         description: Invalid input data.
  */
 router.post('/users', createUser);
 
@@ -36,7 +36,7 @@ router.post('/users', createUser);
  * @swagger
  * /userLogin:
  *   post:
- *     summary: Authenticate a user
+ *     summary: Log in to an existing user account
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -56,11 +56,11 @@ router.post('/users', createUser);
  *                 format: password
  *     responses:
  *       200:
- *         description: User successfully logged in.
+ *         description: User logged in successfully.
  *       401:
- *         description: Authentication failed, incorrect credentials.
+ *         description: Failed login, incorrect credentials.
  *       400:
- *         description: The provided data is not valid.
+ *         description: Invalid input data.
  */
 router.post('/userLogin', loginUser);
 
