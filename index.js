@@ -7,6 +7,11 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const app = express();
 
+const cors = require('cors');
+
+// Allow requests from any origin (or specify a domain)
+app.use(cors({ origin: '*' }));
+
 // Swagger configuration
 const swaggerOptions = {
   definition: {
@@ -24,7 +29,7 @@ const swaggerOptions = {
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: 'https',
+          type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
         },
