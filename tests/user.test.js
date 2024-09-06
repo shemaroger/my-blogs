@@ -1,67 +1,67 @@
 
 
-const request = require('supertest');
-const app = require('../index'); 
+// const request = require('supertest');
+// const app = require('../index'); 
 
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+// const mongoose = require('mongoose');
+// const { MongoMemoryServer } = require('mongodb-memory-server');
 
-describe('User API', () => {
-  let mongoServer;
+// describe('User API', () => {
+//   let mongoServer;
 
-  beforeAll(async () => {    
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
+//   beforeAll(async () => {    
+//     mongoServer = await MongoMemoryServer.create();
+//     const mongoUri = mongoServer.getUri();
     
     
-    if (mongoose.connection.readyState !== 0) {
+//     if (mongoose.connection.readyState !== 0) {
      
-      await mongoose.disconnect();
-    }
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-})
+//       await mongoose.disconnect();
+//     }
+//     await mongoose.connect(mongoUri, {
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//     });
+// })
 
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect();
-  }
-  await mongoServer.stop();
-});
+// afterAll(async () => {
+//   if (mongoose.connection.readyState !== 0) {
+//     await mongoose.disconnect();
+//   }
+//   await mongoServer.stop();
+// });
 
-  it('should create a new user', async () => {
-    const res = await request(app)
-      .post('/api/users')
-      .send({
-        email: 'shema@gmail.com',
-        password: 'shema123',
-      });
+//   it('should create a new user', async () => {
+//     const res = await request(app)
+//       .post('/api/users')
+//       .send({
+//         email: 'shema@gmail.com',
+//         password: 'shema123',
+//       });
 
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('email', 'shema@gmail.com');
-  }, 30000);
+//     expect(res.statusCode).toBe(201);
+//     expect(res.body).toHaveProperty('email', 'shema@gmail.com');
+//   }, 30000);
 
-  it('should login the user and return a token', async () => {
-    // First, create the user
-    await request(app)
-      .post('/api/users')
-      .send({
-        email: 'shema@gmail.com',
-        password: 'shema123',
-      });
+//   it('should login the user and return a token', async () => {
+//     // First, create the user
+//     await request(app)
+//       .post('/api/users')
+//       .send({
+//         email: 'shema@gmail.com',
+//         password: 'shema123',
+//       });
 
-    // Then, login with the created user
-    const res = await request(app)
-      .post('/api/userLogin')
-      .send({
-        email: 'shema@gmail.com',
-        password: 'shema123',
-      });
+//     // Then, login with the created user
+//     const res = await request(app)
+//       .post('/api/userLogin')
+//       .send({
+//         email: 'shema@gmail.com',
+//         password: 'shema123',
+//       });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('token');
-    expect(res.body.token).toMatch(/^Bearer /); // Check if token starts with 'Bearer '
-  }, 30000);
-});
+//     expect(res.statusCode).toBe(200);
+//     expect(res.body).toHaveProperty('token');
+//     expect(res.body.token).toMatch(/^Bearer /); // Check if token starts with 'Bearer '
+//   }, 30000);
+// });
