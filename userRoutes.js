@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const { createUser, loginUser } = require('./controller/userController');
@@ -7,7 +6,7 @@ const { createUser, loginUser } = require('./controller/userController');
  * @swagger
  * /users:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new account
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -16,12 +15,9 @@ const { createUser, loginUser } = require('./controller/userController');
  *           schema:
  *             type: object
  *             required:
- *               - username
  *               - email
  *               - password
  *             properties:
- *               username:
- *                 type: string
  *               email:
  *                 type: string
  *                 format: email
@@ -30,9 +26,9 @@ const { createUser, loginUser } = require('./controller/userController');
  *                 format: password
  *     responses:
  *       201:
- *         description: User registered successfully.
+ *         description: Account created successfully.
  *       400:
- *         description: Invalid input data.
+ *         description: The provided data is not valid.
  */
 router.post('/users', createUser);
 
@@ -40,7 +36,7 @@ router.post('/users', createUser);
  * @swagger
  * /userLogin:
  *   post:
- *     summary: Login a user
+ *     summary: Authenticate a user
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -60,11 +56,11 @@ router.post('/users', createUser);
  *                 format: password
  *     responses:
  *       200:
- *         description: User logged in successfully.
+ *         description: User successfully logged in.
  *       401:
- *         description: Unauthorized, invalid credentials.
+ *         description: Authentication failed, incorrect credentials.
  *       400:
- *         description: Invalid input data.
+ *         description: The provided data is not valid.
  */
 router.post('/userLogin', loginUser);
 

@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const router = express.Router();
 const upload = require('./multer');
@@ -21,7 +19,7 @@ const validateInput = require('./middleware/validateInput');
  * @swagger
  * /blogs:
  *   post:
- *     summary: Create a new blog post
+ *     summary: Publish a new blog entry
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -44,11 +42,11 @@ const validateInput = require('./middleware/validateInput');
  *                 type: string
  *     responses:
  *       201:
- *         description: The blog was successfully created.
+ *         description: The blog post was successfully created.
  *       400:
- *         description: Invalid input data.
+ *         description: Input data is not valid.
  *       401:
- *         description: Unauthorized.
+ *         description: Unauthorized request.
  */
 router.post('/blogs', validateAuth, validateInput, createBlog);
 
@@ -56,7 +54,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  * @swagger
  * /blogs/{id}/image:
  *   post:
- *     summary: Upload an image for a blog post
+ *     summary: Add an image to a blog entry
  *     tags: [Blogs]
  *     parameters:
  *       - in: path
@@ -64,7 +62,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *         required: true
  *         schema:
  *           type: string
- *         description: The blog ID
+ *         description: The unique identifier for the blog
  *     requestBody:
  *       required: true
  *       content:
@@ -77,9 +75,9 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *                 format: binary
  *     responses:
  *       200:
- *         description: Image uploaded successfully.
+ *         description: Image successfully added to the blog post.
  *       404:
- *         description: Blog not found.
+ *         description: Blog entry not found.
  */
 router.post('/blogs/:id/image', upload, uploadImageToBlog);
 
@@ -87,11 +85,11 @@ router.post('/blogs/:id/image', upload, uploadImageToBlog);
  * @swagger
  * /blogs:
  *   get:
- *     summary: Get all blogs
+ *     summary: Retrieve a list of all blog posts
  *     tags: [Blogs]
  *     responses:
  *       200:
- *         description: List of all blogs.
+ *         description: A collection of all blog entries.
  */
 router.get('/blogs', getBlogs);
 
@@ -99,7 +97,7 @@ router.get('/blogs', getBlogs);
  * @swagger
  * /blogs/{id}:
  *   get:
- *     summary: Get a blog by ID
+ *     summary: Fetch a specific blog entry by ID
  *     tags: [Blogs]
  *     parameters:
  *       - in: path
@@ -107,12 +105,12 @@ router.get('/blogs', getBlogs);
  *         required: true
  *         schema:
  *           type: string
- *         description: The blog ID
+ *         description: The unique identifier for the blog
  *     responses:
  *       200:
- *         description: The blog data.
+ *         description: The details of the requested blog post.
  *       404:
- *         description: Blog not found.
+ *         description: Blog entry not found.
  */
 router.get('/blogs/:id', getBlogById);
 
@@ -120,7 +118,7 @@ router.get('/blogs/:id', getBlogById);
  * @swagger
  * /blogs/{id}:
  *   patch:
- *     summary: Update a blog
+ *     summary: Modify an existing blog entry
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -130,7 +128,7 @@ router.get('/blogs/:id', getBlogById);
  *         required: true
  *         schema:
  *           type: string
- *         description: The blog ID
+ *         description: The unique identifier for the blog
  *     requestBody:
  *       required: true
  *       content:
@@ -146,13 +144,13 @@ router.get('/blogs/:id', getBlogById);
  *                 type: string
  *     responses:
  *       200:
- *         description: The blog was updated successfully.
+ *         description: The blog post was successfully updated.
  *       400:
- *         description: Invalid input data.
+ *         description: Provided input data is invalid.
  *       401:
- *         description: Unauthorized.
+ *         description: Unauthorized request.
  *       404:
- *         description: Blog not found.
+ *         description: Blog entry not found.
  */
 router.patch('/blogs/:id', validateAuth, validateInput, updateBlog);
 
@@ -160,7 +158,7 @@ router.patch('/blogs/:id', validateAuth, validateInput, updateBlog);
  * @swagger
  * /blogs/{id}:
  *   delete:
- *     summary: Delete a blog
+ *     summary: Remove a blog entry by ID
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -170,14 +168,14 @@ router.patch('/blogs/:id', validateAuth, validateInput, updateBlog);
  *         required: true
  *         schema:
  *           type: string
- *         description: The blog ID
+ *         description: The unique identifier for the blog
  *     responses:
  *       200:
- *         description: The blog was deleted.
+ *         description: The blog post was successfully deleted.
  *       401:
- *         description: Unauthorized.
+ *         description: Unauthorized request.
  *       404:
- *         description: Blog not found.
+ *         description: Blog entry not found.
  */
 router.delete('/blogs/:id', validateAuth, deleteBlog);
 
@@ -185,7 +183,7 @@ router.delete('/blogs/:id', validateAuth, deleteBlog);
  * @swagger
  * /blogs/{blog_id}/comments:
  *   post:
- *     summary: Add a comment to a blog
+ *     summary: Add a new comment to a blog post
  *     tags: [Comments]
  *     security:
  *       - bearerAuth: []
@@ -195,7 +193,7 @@ router.delete('/blogs/:id', validateAuth, deleteBlog);
  *         required: true
  *         schema:
  *           type: string
- *         description: The blog ID
+ *         description: The unique identifier for the blog
  *     requestBody:
  *       required: true
  *       content:
@@ -209,13 +207,13 @@ router.delete('/blogs/:id', validateAuth, deleteBlog);
  *                 type: integer
  *     responses:
  *       201:
- *         description: The comment was added successfully.
+ *         description: The comment was successfully added.
  *       400:
- *         description: Invalid input data.
+ *         description: Input data is not valid.
  *       401:
- *         description: Unauthorized.
+ *         description: Unauthorized request.
  *       404:
- *         description: Blog not found.
+ *         description: Blog entry not found.
  */
 router.post('/blogs/:blog_id/comments', validateAuth, createComment);
 
@@ -223,7 +221,7 @@ router.post('/blogs/:blog_id/comments', validateAuth, createComment);
  * @swagger
  * /blogs/{blog_id}/comments:
  *   get:
- *     summary: Get comments for a blog
+ *     summary: Retrieve all comments for a specific blog
  *     tags: [Comments]
  *     parameters:
  *       - in: path
@@ -231,12 +229,12 @@ router.post('/blogs/:blog_id/comments', validateAuth, createComment);
  *         required: true
  *         schema:
  *           type: string
- *         description: The blog ID
+ *         description: The unique identifier for the blog
  *     responses:
  *       200:
- *         description: List of comments for the blog.
+ *         description: A list of comments for the specified blog.
  *       404:
- *         description: No comments found for this blog.
+ *         description: No comments found for the blog.
  */
 router.get('/blogs/:blog_id/comments', getCommentsByBlogId);
 
@@ -244,7 +242,7 @@ router.get('/blogs/:blog_id/comments', getCommentsByBlogId);
  * @swagger
  * /comments/{comment_id}/like:
  *   patch:
- *     summary: Update the like count for a comment
+ *     summary: Adjust the like count for a comment
  *     tags: [Comments]
  *     parameters:
  *       - in: path
@@ -252,7 +250,7 @@ router.get('/blogs/:blog_id/comments', getCommentsByBlogId);
  *         required: true
  *         schema:
  *           type: string
- *         description: The comment ID
+ *         description: The unique identifier for the comment
  *     requestBody:
  *       required: true
  *       content:
@@ -264,9 +262,9 @@ router.get('/blogs/:blog_id/comments', getCommentsByBlogId);
  *                 type: integer
  *     responses:
  *       200:
- *         description: The like count was updated.
+ *         description: The like count was updated successfully.
  *       400:
- *         description: Invalid input data.
+ *         description: Input data is not valid.
  *       404:
  *         description: Comment not found.
  */

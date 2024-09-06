@@ -3,7 +3,8 @@ version: 2.1
 executors:
   node-executor:
     docker:
-       - image: cimg/node:16.20
+      - image: cimg/node:16.20
+
 jobs:
   install_dependencies:
     executor: node-executor
@@ -11,26 +12,42 @@ jobs:
       - checkout
       - run:
           name: Install Dependencies
-          command: npm install
+          command: |
+            rm -rf node_modules
+            npm install --ignore-scripts
+
   run_tests:
     executor: node-executor
     steps:
       - checkout
       - run:
-          name: Run Tests          
+          name: Run Tests
           command: |
-             chmod +x ./node_modules/.bin/jest
-             npx jest --coverage --no-cache        
+            chmod +x ./node_modules/.bin/jest
+            npx jest --coverage --no-cache
+      - store_artifacts:
+          path: coverage
+          destination: coverage
+      - store_test_results:
+          path: test-results
+
+  upload_coveralls:
+    executor: node-executor
+    steps:
+      - checkout
       - run:
-          name: Upload Coverage to Coveralls
+          name: Upload to Coveralls
           command: |
             chmod +x ./node_modules/.bin/coveralls
-            npx coveralls < coverage/lcov.info        
+            npx coveralls < ./coverage/lcov.info
+
 workflows:
-  version: 2
   build_and_test:
     jobs:
       - install_dependencies
       - run_tests:
           requires:
             - install_dependencies
+      - upload_coveralls:
+          requires:
+            - run_tests

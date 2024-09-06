@@ -4,14 +4,14 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
-    title: 'Express API Documentation',
+    title: 'Express API ',
     version: '1.0.0',
-    description: 'API documentation for your Express app',
+    description: 'Detailed API documentation for the Express application, outlining the available endpoints and their usage.',
   },
   servers: [
     {
       url: 'http://localhost:5000/api', // Update with your base URL
-      description: 'Development server',
+      description: 'Local development server',
     },
   ],
 };
