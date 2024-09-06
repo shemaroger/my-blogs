@@ -35,12 +35,12 @@ afterAll(async () => {
     const res = await request(app)
       .post('/api/users')
       .send({
-        email: 'amina@gmail.com',
-        password: 'amina123',
+        email: 'shema@gmail.com',
+        password: 'shema123',
       });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('email', 'amina@gmail.com');
+    expect(res.body).toHaveProperty('email', 'shema@gmail.com');
   }, 30000);
 
   it('should login the user and return a token', async () => {
@@ -48,16 +48,16 @@ afterAll(async () => {
     await request(app)
       .post('/api/users')
       .send({
-        email: 'amina@gmail.com',
-        password: 'amina123',
+        email: 'shema@gmail.com',
+        password: 'shema123',
       });
 
     // Then, login with the created user
     const res = await request(app)
       .post('/api/userLogin')
       .send({
-        email: 'amina@gmail.com',
-        password: 'amina123',
+        email: 'shema@gmail.com',
+        password: 'shema123',
       });
 
     expect(res.statusCode).toBe(200);
