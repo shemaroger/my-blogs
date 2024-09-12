@@ -94,7 +94,7 @@ exports.deleteBlog = async (req, res) => {
 // Create Comment
 exports.createComment = async (req, res) => {
     const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).send({ error: "No token provided" });
+    if (!token) return res.status(401).send({ error: "No is token provided" });
 
     const decoded = jwt.verify(token, 'secret_key0987');
     const userId = decoded.id;
