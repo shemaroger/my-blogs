@@ -78,6 +78,7 @@ exports.updateBlog = async (req, res) => {
 
     if (req.body.title) post.title = req.body.title;
     if (req.body.content) post.content = req.body.content;
+    if (req.body.author) post.author = req.body.author;
 
     await post.save();
     res.send(post);
