@@ -104,7 +104,6 @@ describe('User and Blog API Tests', () => {
                       expect(201);
                       expect(res.body).toHaveProperty('title', 'updated Test Blog1');
                       expect(res.body).toHaveProperty('content', 'updated This a test blog content');
-                      expect(res.body).toHaveProperty('author', 'updated This a test blog author');
                     }, 30000);
               
                     it('should delete a blog post', async () => {

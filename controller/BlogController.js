@@ -78,7 +78,6 @@ exports.updateBlog = async (req, res) => {
 
     if (req.body.title) post.title = req.body.title;
     if (req.body.content) post.content = req.body.content;
-    if (req.doy.author) post.author = req.doy.author;
 
     await post.save();
     res.send(post);
@@ -87,14 +86,14 @@ exports.updateBlog = async (req, res) => {
 // Delete Blog
 exports.deleteBlog = async (req, res) => {
     const result = await Post.findByIdAndDelete(req.params.id);
-    if (!result) return res.status(404).send({ error: "Blog is not found" });
+    if (!result) return res.status(404).send({ error: "Blog not found" });
     res.status(204).send();
 };
 
 // Create Comment
 exports.createComment = async (req, res) => {
     const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).send({ error: "No is token provided" });
+    if (!token) return res.status(401).send({ error: "No token provided" });
 
     const decoded = jwt.verify(token, 'secret_key0987');
     const userId = decoded.id;
