@@ -22,7 +22,7 @@ exports.createBlog = async (req, res) => {
     res.status(201).send(post);
 };
 
-// Upload Image to Blog
+
 // Upload Image to Blog
 exports.uploadImageToBlog = async (req, res) => {
     if (!req.file) return res.status(400).json({ err: 'Please select an image' });
@@ -78,6 +78,7 @@ exports.updateBlog = async (req, res) => {
 
     if (req.body.title) post.title = req.body.title;
     if (req.body.content) post.content = req.body.content;
+    if (req.doy.author) post.author = req.doy.author;
 
     await post.save();
     res.send(post);
