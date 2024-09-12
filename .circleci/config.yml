@@ -39,7 +39,7 @@ jobs:
           name: Upload to Coveralls
           command: |
             chmod +x ./node_modules/.bin/coveralls
-            npx coveralls < coverage/lcov.info
+            npx coveralls < ./coverage/lcov.info
 
 workflows:
   build_and_test:
