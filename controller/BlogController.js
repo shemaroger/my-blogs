@@ -23,20 +23,18 @@ exports.createBlog = async (req, res) => {
 };
 
 
-const fs = require('fs').promises; // Ensure fs.promises is used for async file operations
-
 // Upload Image to Blog
 exports.uploadImageToBlog = async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ err: 'Please select an image' });
-    }
+    if (!req.file) return res.status(400).json({ error: 'No image file uploaded' });
 
     try {
         console.log('Uploading image from:', req.file.path); // Log the file path
 
-        const result = await cloudinary.uploader.upload(req.file.path, { folder: "Posts" });
+        // Upload image to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, { folder: 'Posts' });
         console.log('Cloudinary upload result:', result); // Log the Cloudinary result
 
+        // Find the post by ID
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ message: 'Post not found' });
 
@@ -44,7 +42,8 @@ exports.uploadImageToBlog = async (req, res) => {
         post.image = result.secure_url;
         post.public_id = result.public_id;
 
-        await post.save(); // Save post with image URL
+        // Save post with image URL
+        await post.save();
         console.log('Image URL saved to post:', post.image);
 
         // Remove the file from local uploads folder
@@ -58,7 +57,7 @@ exports.uploadImageToBlog = async (req, res) => {
         });
     } catch (err) {
         console.error('Error uploading image:', err); // Log any errors
-        res.status(500).json({ error: 'Error uploading image' });
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
