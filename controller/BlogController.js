@@ -87,7 +87,7 @@ exports.updateBlog = async (req, res) => {
 // Delete Blog
 exports.deleteBlog = async (req, res) => {
     const result = await Post.findByIdAndDelete(req.params.id);
-    if (!result) return res.status(404).send({ error: "Blog not found" });
+    if (!result) return res.status(404).send({ error: "Blog is not found" });
     res.status(204).send();
 };
 
