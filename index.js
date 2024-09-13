@@ -8,21 +8,9 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const app = express();
 
 const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 
 // Allow requests from any origin (or specify a domain)
 app.use(cors({ origin: '*' }));
-
-// Apply security headers
-app.use(helmet());
-// Rate limiting to prevent abuse
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
-
 
 // Swagger configuration
 const swaggerOptions = {
