@@ -12,10 +12,7 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   mongoUri = mongoServer.getUri();
   
-  await mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(mongoUri);
 });
 
 afterAll(async () => {
@@ -28,16 +25,14 @@ describe('Comment Endpoints', () => {
   let userId;
   
   beforeEach(async () => {
-    // Create a test user with a password
     const user = new User({
       name: 'Test User',
       email: 'testuser@example.com',
-      password: 'testpassword123' // Add a password here
+      password: 'testpassword123'
     });
     const savedUser = await user.save();
     userId = savedUser._id;
     
-    // Create a test blog
     const blog = new Blog({ title: 'Test Blog', content: 'This is a test blog', author: 'testauthor' });
     const savedBlog = await blog.save();
     blogId = savedBlog._id;
@@ -47,7 +42,7 @@ describe('Comment Endpoints', () => {
     const response = await request(app)
       .post(`/api/blogs/${blogId}/comments`)
       .send({ author: userId, content: 'This is a comment' })
-      .expect(200);
+      .expect(201);
 
     expect(response.body).toHaveProperty('message', 'Comment added successfully');
     const updatedBlog = await Blog.findById(blogId);

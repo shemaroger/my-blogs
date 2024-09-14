@@ -11,10 +11,7 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   mongoUri = mongoServer.getUri();
   
-  await mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(mongoUri);
 });
 
 afterAll(async () => {
@@ -35,7 +32,7 @@ describe('Like Endpoints', () => {
     const userId = new mongoose.Types.ObjectId(); // Use 'new' keyword here
 
     const response = await request(app)
-      .post(`/api/blogs/${blogId}/like`)
+      .post(`/api/blogs/${blogId}/likes`)
       .send({ userId })
       .expect(200);
 
@@ -48,12 +45,12 @@ describe('Like Endpoints', () => {
     const userId = new mongoose.Types.ObjectId(); // Use 'new' keyword here
 
     await request(app)
-      .post(`/api/blogs/${blogId}/like`)
+      .post(`/api/blogs/${blogId}/likes`)
       .send({ userId })
       .expect(200);
 
     const response = await request(app)
-      .post(`/api/blogs/${blogId}/like`)
+      .post(`/api/blogs/${blogId}/likes`)
       .send({ userId })
       .expect(400);
 
