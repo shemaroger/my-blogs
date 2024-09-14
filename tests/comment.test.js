@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const request = require('supertest');
-const app = require('../app'); // Adjust the path to your Express app
+const app = require('../index'); // Adjust the path to your Express app
 const Blog = require('../Models/Blogs'); // Adjust the path to your Blog model
 const User = require('../Models/User'); // Adjust the path to your User model
 
