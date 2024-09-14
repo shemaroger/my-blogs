@@ -1,96 +1,96 @@
+// In like.test.js
+
 const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const jwt = require('jsonwebtoken');
-const app = require('../index'); // Adjust the path to your Express app
-const Blog = require('../Models/Blogs');
-const User = require('../Models/User');
+const app = require('../app'); // Adjust this path if necessary
 
 let mongoServer;
-let server;
 let token;
-let user;
 let blogId;
+let userId;
 
 beforeAll(async () => {
-  jest.setTimeout(30000); // Increase timeout for setup
   mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  const mongoUri = mongoServer.getUri();
   
-  // Start the server on a random port
-  server = app.listen(0);
+  await mongoose.connect(mongoUri);
 
-  // Create a test user and get a token for authentication
-  user = new User({ name: 'Test User', email: 'testuser@example.com', password: 'password123' });
-  await user.save();
-  token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'testsecret', { expiresIn: '1h' });
+  // Create a user and get token
+  const userResponse = await request(app)
+    .post('/api/users')
+    .send({ username: 'testuser', email: 'test@example.com', password: 'password123' });
+  
+  const loginResponse = await request(app)
+    .post('/api/login')
+    .send({ email: 'test@example.com', password: 'password123' });
+  
+  token = loginResponse.body.token;
+  userId = userResponse.body._id;
 
-  // Create a test blog
-  const blog = new Blog({ title: 'Blog for Likes', content: 'Content of the blog', author: user._id });
-  await blog.save();
-  blogId = blog._id;
-}, 30000);
+  // Create a blog post
+  const blogResponse = await request(app)
+    .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ title: 'Test Blog', content: 'Test content' });
+  
+  blogId = blogResponse.body._id;
+});
 
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
-  await new Promise((resolve) => server.close(resolve));
 });
 
 describe('Like Endpoints', () => {
-  beforeEach(async () => {
-    // Reset likes before each test
-    await Blog.findByIdAndUpdate(blogId, { $set: { likes: [] } });
-  });
-
   it('should toggle a like on a blog', async () => {
-    const response = await request(server)
-      .post(`/blogs/${blogId}/likes`)
+    const response = await request(app)
+      .post(`/api/blogs/${blogId}/likes`)
       .set('Authorization', `Bearer ${token}`);
+    
     expect(response.statusCode).toBe(200);
     expect(Array.isArray(response.body.likes)).toBe(true);
-    expect(response.body.likes).toContain(user._id.toString());
+    expect(response.body.likes).toContain(userId);
   });
 
   it('should remove a like when toggled twice', async () => {
     // First like
-    await request(server)
-      .post(`/blogs/${blogId}/likes`)
+    await request(app)
+      .post(`/api/blogs/${blogId}/likes`)
       .set('Authorization', `Bearer ${token}`);
-
-    // Second like (should remove)
-    const response = await request(server)
-      .post(`/blogs/${blogId}/likes`)
+    
+    // Unlike
+    const response = await request(app)
+      .post(`/api/blogs/${blogId}/likes`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.statusCode).toBe(200);
     expect(Array.isArray(response.body.likes)).toBe(true);
-    expect(response.body.likes).not.toContain(user._id.toString());
+    expect(response.body.likes).not.toContain(userId);
   });
 
   it('should not toggle a like without authentication', async () => {
-    const response = await request(server)
-      .post(`/blogs/${blogId}/likes`);
+    const response = await request(app)
+      .post(`/api/blogs/${blogId}/likes`);
     expect(response.statusCode).toBe(401);
   });
 
   it('should not toggle a like on a non-existent blog', async () => {
-    const fakeId = mongoose.Types.ObjectId();
-    const response = await request(server)
-      .post(`/blogs/${fakeId}/likes`)
+    const fakeId = new mongoose.Types.ObjectId();
+    const response = await request(app)
+      .post(`/api/blogs/${fakeId}/likes`)
       .set('Authorization', `Bearer ${token}`);
     expect(response.statusCode).toBe(404);
   });
 
   it('should get likes count for a blog', async () => {
-    // Add a like first
-    await request(server)
-      .post(`/blogs/${blogId}/likes`)
+    // Ensure there's a like on the blog
+    await request(app)
+      .post(`/api/blogs/${blogId}/likes`)
       .set('Authorization', `Bearer ${token}`);
 
-    const response = await request(server)
-      .get(`/blogs/${blogId}/likes/count`);
+    const response = await request(app)
+      .get(`/api/blogs/${blogId}/likes/count`);
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('count');
     expect(response.body.count).toBe(1);
