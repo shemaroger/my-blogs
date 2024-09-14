@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const jwt = require('jsonwebtoken');
 const app = require('../app'); // Adjust the path to your Express app
-const Blog = require('../models/Blog');
+const Blog = require('../Models/Blog');
 const User = require('../Models/User');
-const Comment = require('../Models/Comment'); // Assuming you have a Comment model
+const Comment = require('../models/Comment'); // Assuming you have a Comment model
 
 let mongoServer;
 let server;
@@ -17,17 +17,14 @@ beforeAll(async () => {
   jest.setTimeout(30000); // Increase timeout for setup
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
-  await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
-  // Start the server on a random port
+  await mongoose.connect(uri);
+  
   server = app.listen(0);
 
-  // Create a test user and get a token for authentication
   user = new User({ name: 'Test User', email: 'testuser@example.com', password: 'password123' });
   await user.save();
   token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'testsecret', { expiresIn: '1h' });
 
-  // Create a test blog
   const blog = new Blog({ title: 'Blog for Comments', content: 'Content of the blog', author: user._id });
   await blog.save();
   blogId = blog._id;
@@ -54,7 +51,6 @@ describe('Comment Endpoints', () => {
   });
 
   it('should get all comments for a blog', async () => {
-    // Add a few comments to the blog
     await Comment.create({ blog: blogId, author: user._id, content: 'Comment 1' });
     await Comment.create({ blog: blogId, author: user._id, content: 'Comment 2' });
 
@@ -78,7 +74,7 @@ describe('Comment Endpoints', () => {
   });
 
   it('should not add a comment to a non-existent blog', async () => {
-    const fakeId = mongoose.Types.ObjectId();
+    const fakeId = new mongoose.Types.ObjectId();
     const response = await request(server)
       .post(`/blogs/${fakeId}/comments`)
       .set('Authorization', `Bearer ${token}`)
