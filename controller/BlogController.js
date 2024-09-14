@@ -1,5 +1,4 @@
 const Post = require('../Models/Blogs');
-const Comments = require('../Models/Coments');
 const cloudinary = require('../cloudinary');
 const fs = require('fs').promises;
 const jwt = require('jsonwebtoken');
@@ -94,54 +93,55 @@ exports.deleteBlog = async (req, res) => {
     res.status(204).send();
 };
 
-// Create Comment
-exports.createComment = async (req, res) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).send({ error: "No token provided" });
 
-    const decoded = jwt.verify(token, 'secret_key0987');
-    const userId = decoded.id;
+// // Create Comment
+// exports.createComment = async (req, res) => {
+//     const token = req.headers['authorization']?.split(' ')[1];
+//     if (!token) return res.status(401).send({ error: "No token provided" });
 
-    const comment = new Comments({
-        like: req.body.like || 0,
-        blog_id: req.params.blog_id,
-        user_id: userId,
-        comment: req.body.comment,
-    });
+//     const decoded = jwt.verify(token, 'secret_key0987');
+//     const userId = decoded.id;
 
-    await comment.save();
-    res.status(201).send(comment);
-};
+//     const comment = new Comments({
+//         like: req.body.like || 0,
+//         blog_id: req.params.blog_id,
+//         user_id: userId,
+//         comment: req.body.comment,
+//     });
 
-// Update Like on Comment
-exports.updateLike = async (req, res) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).send({ error: "No token provided" });
+//     await comment.save();
+//     res.status(201).send(comment);
+// };
 
-    const decoded = jwt.verify(token, 'secret_key0987');
-    const userId = decoded.id;
+// // Update Like on Comment
+// exports.updateLike = async (req, res) => {
+//     const token = req.headers['authorization']?.split(' ')[1];
+//     if (!token) return res.status(401).send({ error: "No token provided" });
 
-    const { comment_id } = req.params;
-    const { like } = req.body;
+//     const decoded = jwt.verify(token, 'secret_key0987');
+//     const userId = decoded.id;
 
-    if (typeof like !== 'number' || like < 0) {
-        return res.status(400).send({ error: "Invalid like value" });
-    }
+//     const { comment_id } = req.params;
+//     const { like } = req.body;
 
-    const comment = await Comments.findOneAndUpdate(
-        { _id: comment_id, user_id: userId },
-        { like },
-        { new: true }
-    );
+//     if (typeof like !== 'number' || like < 0) {
+//         return res.status(400).send({ error: "Invalid like value" });
+//     }
 
-    if (!comment) return res.status(404).send({ error: "Comment not found or not authorized" });
+//     const comment = await Comments.findOneAndUpdate(
+//         { _id: comment_id, user_id: userId },
+//         { like },
+//         { new: true }
+//     );
 
-    res.send(comment);
-};
+//     if (!comment) return res.status(404).send({ error: "Comment not found or not authorized" });
 
-// Get Comments by Blog ID
-exports.getCommentsByBlogId = async (req, res) => {
-    const comments = await Comments.find({ blog_id: req.params.blog_id }).populate('user_id', 'email');
-    if (!comments || comments.length === 0) return res.status(404).send({ error: "No comments found for this blog" });
-    res.send(comments);
-};
+//     res.send(comment);
+// };
+
+// // Get Comments by Blog ID
+// exports.getCommentsByBlogId = async (req, res) => {
+//     const comments = await Comments.find({ blog_id: req.params.blog_id }).populate('user_id', 'email');
+//     if (!comments || comments.length === 0) return res.status(404).send({ error: "No comments found for this blog" });
+//     res.send(comments);
+// };
