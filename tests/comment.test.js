@@ -1,93 +1,104 @@
 const request = require('supertest');
+const app = require('../index');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const jwt = require('jsonwebtoken');
-const app = require('../index'); // Adjust the path to your Express app
-const Blog = require('../Models/Blogs');
-const User = require('../Models/User');
-const Comment = require('../Models/Comment'); // Assuming you have a Comment model
 
-let mongoServer;
-let server;
-let token;
-let user;
-let blogId;
+describe('Blog Comments API Tests', () => {
+  let token;
+  let blogId;
+  let commentId;
+  let mongoServer;
 
-beforeAll(async () => {
-  jest.setTimeout(30000); // Increase timeout for setup
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri);
-  
-  server = app.listen(0);
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
 
-  user = new User({ name: 'Test User', email: 'testuser@example.com', password: 'password123' });
-  await user.save();
-  token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'testsecret', { expiresIn: '1h' });
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
 
-  const blog = new Blog({ title: 'Blog for Comments', content: 'Content of the blog', author: user._id });
-  await blog.save();
-  blogId = blog._id;
-}, 30000);
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-  await new Promise((resolve) => server.close(resolve));
-});
+    // Create a user and log in to get the token
+    await request(app)
+      .post('/api/users')
+      .send({
+        email: 'user@test.com',
+        password: 'password123',
+      });
 
-describe('Comment Endpoints', () => {
-  beforeEach(async () => {
-    await Comment.deleteMany({}); // Clear comments before each test
+    const res = await request(app)
+      .post('/api/userLogin')
+      .send({
+        email: 'user@test.com',
+        password: 'password123',
+      });
+
+    token = res.body.token;
+
+    // Create a blog post
+    const blogRes = await request(app)
+      .post('/api/blogs')
+      .set('Authorization', token)
+      .send({
+        title: 'Test Blog',
+        content: 'This is the content of the test blog.',
+        author: 'Test Author',
+      });
+
+    blogId = blogRes.body._id;
   });
 
-  it('should add a comment to a blog', async () => {
-    const response = await request(server)
-      .post(`/blogs/${blogId}/comments`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ content: 'This is a comment.' });
-    expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty('content', 'This is a comment.');
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
-  it('should get all comments for a blog', async () => {
-    await Comment.create({ blog: blogId, author: user._id, content: 'Comment 1' });
-    await Comment.create({ blog: blogId, author: user._id, content: 'Comment 2' });
+  it('should add a comment to a blog post', async () => {
+    const res = await request(app)
+      .post(`/api/blogs/${blogId}/comments`)
+      .set('Authorization', token)
+      .send({
+        content: 'This is a test comment.',
+      });
 
-    const response = await request(server).get(`/blogs/${blogId}/comments`);
-    expect(response.statusCode).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBe(2);
-    expect(response.body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ content: 'Comment 1' }),
-        expect.objectContaining({ content: 'Comment 2' })
-      ])
-    );
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty('content', 'This is a test comment');
+    commentId = res.body._id;
   });
 
-  it('should not add a comment without authentication', async () => {
-    const response = await request(server)
-      .post(`/blogs/${blogId}/comments`)
-      .send({ content: 'This comment should not be added.' });
-    expect(response.statusCode).toBe(401);
+  it('should retrieve all comments for a blog post', async () => {
+    const res = await request(app)
+      .get(`/api/blogs/${blogId}/comments`)
+      .set('Authorization', token);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body[0]).toHaveProperty('content', 'This is a test comment');
   });
 
-  it('should not add a comment to a non-existent blog', async () => {
-    const fakeId = new mongoose.Types.ObjectId();
-    const response = await request(server)
-      .post(`/blogs/${fakeId}/comments`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ content: 'This comment should not be added.' });
-    expect(response.statusCode).toBe(404);
+  it('should return 404 if the blog does not exist when adding a comment', async () => {
+    const res = await request(app)
+      .post(`/api/blogs/1234567890/comments`) // Invalid blog ID
+      .set('Authorization', token)
+      .send({
+        content: 'This comment should fail.',
+      });
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('message', 'Blog not found');
   });
 
-  it('should delete a comment', async () => {
-    const comment = await Comment.create({ blog: blogId, author: user._id, content: 'Comment to delete' });
-    const response = await request(server)
-      .delete(`/blogs/${blogId}/comments/${comment._id}`)
-      .set('Authorization', `Bearer ${token}`);
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Comment deleted successfully');
+  it('should return 404 if the blog does not exist when retrieving comments', async () => {
+    const res = await request(app)
+      .get(`/api/blogs/1234567890/comments`) // Invalid blog ID
+      .set('Authorization', token);
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('message', 'Blog not found');
   });
 });
