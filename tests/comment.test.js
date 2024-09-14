@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const app = require('../index'); // Adjust the path to your Express app
 const Blog = require('../Models/Blogs');
 const User = require('../Models/User');
-const Comment = require('../Models/Comment'); // Assuming you have a Comment model
+const Comment = require('../Models/Comment');
 
 let mongoServer;
 let server;
@@ -18,7 +18,7 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await mongoose.connect(uri);
-  
+
   server = app.listen(0);
 
   user = new User({ name: 'Test User', email: 'testuser@example.com', password: 'password123' });
