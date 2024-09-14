@@ -1,8 +1,5 @@
-
-
 const request = require('supertest');
-const app = require('../index'); 
-
+const app = require('../index');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -13,23 +10,16 @@ describe('User API', () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     
-    
-    if (mongoose.connection.readyState !== 0) {
-     
-      await mongoose.disconnect();
-    }
     await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-})
+      useUnifiedTopology: true,
+    });
+  });
 
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
+  afterAll(async () => {
     await mongoose.disconnect();
-  }
-  await mongoServer.stop();
-});
+    await mongoServer.stop();
+  });
 
   it('should create a new user', async () => {
     const res = await request(app)

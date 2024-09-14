@@ -12,7 +12,10 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
   
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
   // Create a user and get token
   const userResponse = await request(app)
@@ -70,7 +73,9 @@ describe('Like Endpoints', () => {
   it('should not toggle a like without authentication', async () => {
     const response = await request(app)
       .post(`/api/blogs/${blogId}/likes`);
+      
     expect(response.statusCode).toBe(401);
+    expect(response.body).toHaveProperty('message', 'Unauthorized');
   });
 
   it('should not toggle a like on a non-existent blog', async () => {
@@ -78,7 +83,9 @@ describe('Like Endpoints', () => {
     const response = await request(app)
       .post(`/api/blogs/${fakeId}/likes`)
       .set('Authorization', `Bearer ${token}`);
+      
     expect(response.statusCode).toBe(404);
+    expect(response.body).toHaveProperty('message', 'Blog not found');
   });
 
   it('should get likes count for a blog', async () => {
@@ -88,7 +95,9 @@ describe('Like Endpoints', () => {
       .set('Authorization', `Bearer ${token}`);
 
     const response = await request(app)
-      .get(`/api/blogs/${blogId}/likes/count`);
+      .get(`/api/blogs/${blogId}/likes/count`)
+      .set('Authorization', `Bearer ${token}`);
+      
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('count');
     expect(response.body.count).toBe(1);

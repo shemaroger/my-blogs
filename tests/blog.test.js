@@ -12,10 +12,10 @@ describe('User and Blog API Tests', () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect();
-    }
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
   });
 
   afterAll(async () => {
@@ -50,7 +50,7 @@ describe('User and Blog API Tests', () => {
   it('should create a new blog post using the stored token', async () => {
     const res = await request(app)
       .post('/api/blogs')
-      .set('Authorization', token)
+      .set('Authorization', `Bearer ${token}`)
       .send({
         title: 'New Blog Post',
         content: 'This is the content of the new blog post.',
@@ -66,7 +66,7 @@ describe('User and Blog API Tests', () => {
   it('should get all blog posts', async () => {
     const res = await request(app)
       .get('/api/blogs')
-      .set('Authorization', token);
+      .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/json/);
@@ -80,7 +80,7 @@ describe('User and Blog API Tests', () => {
   it('should update a blog post', async () => {
     const res = await request(app)
       .patch(`/api/blogs/${blog_id}`)
-      .set('Authorization', token)
+      .set('Authorization', `Bearer ${token}`)
       .send({
         title: 'Updated Test Blog1',
         content: 'Updated This is a test blog content',
@@ -95,7 +95,7 @@ describe('User and Blog API Tests', () => {
   it('should delete a blog post', async () => {
     const res = await request(app)
       .delete(`/api/blogs/${blog_id}`)
-      .set('Authorization', token);
+      .set('Authorization', `Bearer ${token}`);
     
     expect(res.status).toBe(204);
   }, 30000);
@@ -103,7 +103,7 @@ describe('User and Blog API Tests', () => {
   it('should return 400 for invalid input', async () => {
     const res = await request(app)
       .post('/api/blogs')
-      .set('Authorization', token)
+      .set('Authorization', `Bearer ${token}`)
       .send({
         title: '',
         content: 'This is a test blog content'

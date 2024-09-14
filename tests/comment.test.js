@@ -2,7 +2,6 @@ const request = require('supertest');
 const app = require('../index');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const { expect } = require('@jest/globals');
 
 describe('Blog Comments API Tests', () => {
   let token;
@@ -14,10 +13,10 @@ describe('Blog Comments API Tests', () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect();
-    }
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
     // Create a user and log in to get the token
     await request(app)
@@ -99,5 +98,13 @@ describe('Blog Comments API Tests', () => {
 
     expect(res.status).toBe(404);
     expect(res.body).toHaveProperty('message', 'Blog not found');
+  });
+
+  it('should delete a comment from a blog post', async () => {
+    const res = await request(app)
+      .delete(`/api/blogs/${blogId}/comments/${commentId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(204);
   });
 });
