@@ -35,7 +35,7 @@ describe('Like Endpoints', () => {
   });
 
   test('should like a blog', async () => {
-    const userId = mongoose.Types.ObjectId(); // Simulate a user ID
+    const userId = new mongoose.Types.ObjectId(); // Use new mongoose.Types.ObjectId()
 
     const response = await request(app)
       .post(`/api/blogs/${blogId}/like`)
@@ -44,11 +44,11 @@ describe('Like Endpoints', () => {
 
     expect(response.body).toHaveProperty('message', 'Blog liked successfully');
     const updatedBlog = await Blog.findById(blogId);
-    expect(updatedBlog.likes).toContain(userId);
+    expect(updatedBlog.likes).toContain(userId.toString());
   });
 
   test('should not like a blog twice by the same user', async () => {
-    const userId = mongoose.Types.ObjectId(); // Simulate a user ID
+    const userId = new mongoose.Types.ObjectId(); // Use new mongoose.Types.ObjectId()
 
     await request(app)
       .post(`/api/blogs/${blogId}/like`)
