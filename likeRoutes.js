@@ -40,6 +40,6 @@ const { validateAuth } = require('../middleware/authMiddleware');
  *         description: Blog post not found.
  */
 
-router.post('api/blogs/:blogId/likes', validateAuth, likeController.toggleLike);
+router.post('blogs/:blogId/likes', validateAuth, likeController.toggleLike);
 
 module.exports = router;
