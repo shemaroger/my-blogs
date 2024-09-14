@@ -20,6 +20,7 @@ const blogSchema = new mongoose.Schema({
   author: {
     type: String,
   },
+  
 });
 
 module.exports = mongoose.model("Blog", blogSchema);
