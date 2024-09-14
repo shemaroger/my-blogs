@@ -1,101 +1,98 @@
 const request = require('supertest');
-const app = require('../index');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const jwt = require('jsonwebtoken');
+const app = require('../app'); // Adjust the path to your Express app
+const Blog = require('../Models/Blogs');
+const User = require('../Models/User');
 
-describe('Blog Like/Unlike API Tests', () => {
-  let token;
-  let blogId;
-  let mongoServer;
+let mongoServer;
+let server;
+let token;
+let user;
+let blogId;
 
-  beforeAll(async () => {    
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect();
-    }
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+beforeAll(async () => {
+  jest.setTimeout(30000); // Increase timeout for setup
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  
+  // Start the server on a random port
+  server = app.listen(0);
 
-    // Create a user and get a token
-    await request(app)
-      .post('/api/users')
-      .send({
-        email: 'user@example.com',
-        password: 'password123',
-      });
+  // Create a test user and get a token for authentication
+  user = new User({ name: 'Test User', email: 'testuser@example.com', password: 'password123' });
+  await user.save();
+  token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'testsecret', { expiresIn: '1h' });
 
-    const loginRes = await request(app)
-      .post('/api/userLogin')
-      .send({
-        email: 'user@example.com',
-        password: 'password123',
-      });
+  // Create a test blog
+  const blog = new Blog({ title: 'Blog for Likes', content: 'Content of the blog', author: user._id });
+  await blog.save();
+  blogId = blog._id;
+}, 30000);
 
-    token = loginRes.body.token;
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+  await new Promise((resolve) => server.close(resolve));
+});
 
-    // Create a blog post
-    const blogRes = await request(app)
-      .post('/api/blogs')
-      .set('Authorization', token)
-      .send({
-        title: 'Test Blog',
-        content: 'This is a test blog post',
-        author: 'Test Author',
-      });
-
-    blogId = blogRes.body._id;
+describe('Like Endpoints', () => {
+  beforeEach(async () => {
+    // Reset likes before each test
+    await Blog.findByIdAndUpdate(blogId, { $set: { likes: [] } });
   });
 
-  afterAll(async () => {
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect();
-    }
-    await mongoServer.stop();
+  it('should toggle a like on a blog', async () => {
+    const response = await request(server)
+      .post(`/blogs/${blogId}/likes`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body.likes)).toBe(true);
+    expect(response.body.likes).toContain(user._id.toString());
   });
 
-  it('should like a blog post if the user has not liked it', async () => {
-    const res = await request(app)
-      .post(`/api/blogs/${blogId}/toggleLike`)
-      .set('Authorization', token);
+  it('should remove a like when toggled twice', async () => {
+    // First like
+    await request(server)
+      .post(`/blogs/${blogId}/likes`)
+      .set('Authorization', `Bearer ${token}`);
 
-    expect(res.status).toBe(200);
-    expect(res.body).toContainEqual(expect.any(String)); // Check that the likes array contains user ID
+    // Second like (should remove)
+    const response = await request(server)
+      .post(`/blogs/${blogId}/likes`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body.likes)).toBe(true);
+    expect(response.body.likes).not.toContain(user._id.toString());
   });
 
-  it('should unlike a blog post if the user has already liked it', async () => {
-    // Like the blog post first
-    await request(app)
-      .post(`/api/blogs/${blogId}/toggleLike`)
-      .set('Authorization', token);
-
-    // Unlike the blog post
-    const res = await request(app)
-      .post(`/api/blogs/${blogId}/toggleLike`)
-      .set('Authorization', token);
-
-    expect(res.status).toBe(200);
-    expect(res.body).not.toContainEqual(expect.any(String)); // Check that the likes array does not contain user ID
+  it('should not toggle a like without authentication', async () => {
+    const response = await request(server)
+      .post(`/blogs/${blogId}/likes`);
+    expect(response.statusCode).toBe(401);
   });
 
-  it('should return 404 if the blog post is not found', async () => {
-    const invalidBlogId = new mongoose.Types.ObjectId();
-    const res = await request(app)
-      .post(`/api/blogs/${invalidBlogId}/toggleLike`)
-      .set('Authorization', token);
-
-    expect(res.status).toBe(404);
-    expect(res.body).toHaveProperty('message', 'Blog not found');
+  it('should not toggle a like on a non-existent blog', async () => {
+    const fakeId = mongoose.Types.ObjectId();
+    const response = await request(server)
+      .post(`/blogs/${fakeId}/likes`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(response.statusCode).toBe(404);
   });
 
-  it('should return 401 for unauthorized access', async () => {
-    // Test without authorization header
-    const res = await request(app)
-      .post(`/api/blogs/${blogId}/toggleLike`);
+  it('should get likes count for a blog', async () => {
+    // Add a like first
+    await request(server)
+      .post(`/blogs/${blogId}/likes`)
+      .set('Authorization', `Bearer ${token}`);
 
-    expect(res.status).toBe(401);
+    const response = await request(server)
+      .get(`/blogs/${blogId}/likes/count`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('count');
+    expect(response.body.count).toBe(1);
   });
 });
