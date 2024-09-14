@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const app = require('../index'); // Adjust the path to your Express app
 const Blog = require('../Models/Blogs');
 const User = require('../Models/User');
-const Comment = require('../models/Comment'); // Assuming you have a Comment model
+const Comment = require('../Models/Comment'); // Assuming you have a Comment model
 
 let mongoServer;
 let server;
