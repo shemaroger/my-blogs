@@ -1,10 +1,8 @@
-// tests/like.test.js
-
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const request = require('supertest');
-const app = require('../index'); // Adjust the path to your Express app
-const Blog = require('../Models/Blogs'); // Adjust the path to your Blog model
+const app = require('../index');
+const Blog = require('../Models/Blogs');
 
 let mongoServer;
 let mongoUri;
@@ -28,14 +26,13 @@ describe('Like Endpoints', () => {
   let blogId;
   
   beforeEach(async () => {
-    // Create a test blog
     const blog = new Blog({ title: 'Test Blog', content: 'This is a test blog', author: 'testauthor' });
     const savedBlog = await blog.save();
     blogId = savedBlog._id;
   });
 
   test('should like a blog', async () => {
-    const userId = mongoose.Types.ObjectId(); // Simulate a user ID
+    const userId = new mongoose.Types.ObjectId(); // Use 'new' keyword here
 
     const response = await request(app)
       .post(`/api/blogs/${blogId}/like`)
@@ -44,11 +41,11 @@ describe('Like Endpoints', () => {
 
     expect(response.body).toHaveProperty('message', 'Blog liked successfully');
     const updatedBlog = await Blog.findById(blogId);
-    expect(updatedBlog.likes).toContain(userId);
+    expect(updatedBlog.likes).toContain(userId.toString());
   });
 
   test('should not like a blog twice by the same user', async () => {
-    const userId = mongoose.Types.ObjectId(); // Simulate a user ID
+    const userId = new mongoose.Types.ObjectId(); // Use 'new' keyword here
 
     await request(app)
       .post(`/api/blogs/${blogId}/like`)

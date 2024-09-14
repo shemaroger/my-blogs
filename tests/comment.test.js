@@ -1,11 +1,9 @@
-// tests/comment.test.js
-
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const request = require('supertest');
-const app = require('../index'); // Adjust the path to your Express app
-const Blog = require('../Models/Blogs'); // Adjust the path to your Blog model
-const User = require('../Models/User'); // Adjust the path to your User model
+const app = require('../index');
+const Blog = require('../Models/Blogs');
+const User = require('../Models/User');
 
 let mongoServer;
 let mongoUri;
@@ -30,8 +28,12 @@ describe('Comment Endpoints', () => {
   let userId;
   
   beforeEach(async () => {
-    // Create a test user
-    const user = new User({ name: 'Test User', email: 'testuser@example.com' });
+    // Create a test user with a password
+    const user = new User({
+      name: 'Test User',
+      email: 'testuser@example.com',
+      password: 'testpassword123' // Add a password here
+    });
     const savedUser = await user.save();
     userId = savedUser._id;
     
