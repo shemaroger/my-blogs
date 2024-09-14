@@ -2,7 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const jwt = require('jsonwebtoken');
-const app = require('../app'); // Adjust the path to your Express app
+const app = require('../index'); // Adjust the path to your Express app
 const Blog = require('../Models/Blogs');
 const User = require('../Models/User');
 
