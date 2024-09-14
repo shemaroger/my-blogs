@@ -24,12 +24,10 @@ const blogSchema = new mongoose.Schema({
     default: Date.now,
   },
   author: {
-    type: mongoose.Schema.Types.ObjectId, // Changed to ObjectId for reference
-    ref: 'User',
-    required: true
+    type: String,
   },
-  comments: [commentSchema],
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+ comments: [commentSchema], // Added comments field
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Added likes field
 }, { timestamps: true });
 
 module.exports = mongoose.model("Blog", blogSchema);

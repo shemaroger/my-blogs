@@ -9,14 +9,13 @@ describe('Blog Comments API Tests', () => {
   let commentId;
   let mongoServer;
 
-  beforeAll(async () => {
+  beforeAll(async () => {    
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-
+    
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
-
     await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -53,7 +52,9 @@ describe('Blog Comments API Tests', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
     await mongoServer.stop();
   });
 

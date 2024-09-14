@@ -8,10 +8,10 @@ describe('Blog Like/Unlike API Tests', () => {
   let blogId;
   let mongoServer;
 
-  beforeAll(async () => {
+  beforeAll(async () => {    
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-
+    
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
@@ -21,7 +21,7 @@ describe('Blog Like/Unlike API Tests', () => {
     });
 
     // Create a user and get a token
-    const userRes = await request(app)
+    await request(app)
       .post('/api/users')
       .send({
         email: 'user@example.com',
@@ -82,7 +82,7 @@ describe('Blog Like/Unlike API Tests', () => {
   });
 
   it('should return 404 if the blog post is not found', async () => {
-    const invalidBlogId = mongoose.Types.ObjectId();
+    const invalidBlogId = new mongoose.Types.ObjectId();
     const res = await request(app)
       .post(`/api/blogs/${invalidBlogId}/toggleLike`)
       .set('Authorization', token);
