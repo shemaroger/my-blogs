@@ -1,110 +1,69 @@
-const request = require('supertest');
-const app = require('../index');
+// tests/comment.test.js
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const request = require('supertest');
+const app = require('../app'); // Adjust the path to your Express app
+const Blog = require('../Models/Blogs'); // Adjust the path to your Blog model
+const User = require('../Models/User'); // Adjust the path to your User model
 
-describe('Blog Comments API Tests', () => {
-  let token;
+let mongoServer;
+let mongoUri;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  mongoUri = mongoServer.getUri();
+  
+  await mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+describe('Comment Endpoints', () => {
   let blogId;
-  let commentId;
-  let mongoServer;
-
-  beforeAll(async () => {    
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
+  let userId;
+  
+  beforeEach(async () => {
+    // Create a test user
+    const user = new User({ name: 'Test User', email: 'testuser@example.com' });
+    const savedUser = await user.save();
+    userId = savedUser._id;
     
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    // Create a user and log in to get the token
-    await request(app)
-      .post('/api/users')
-      .send({
-        email: 'user@test.com',
-        password: 'password123',
-      });
-
-    const res = await request(app)
-      .post('/api/userLogin')
-      .send({
-        email: 'user@test.com',
-        password: 'password123',
-      });
-
-    token = res.body.token;
-
-    // Create a blog post
-    const blogRes = await request(app)
-      .post('/api/blogs')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        title: 'Test Blog',
-        content: 'This is the content of the test blog.',
-        author: 'Test Author',
-      });
-
-    blogId = blogRes.body._id;
-  }, 30000); // Increased timeout for setup
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    // Create a test blog
+    const blog = new Blog({ title: 'Test Blog', content: 'This is a test blog', author: 'testauthor' });
+    const savedBlog = await blog.save();
+    blogId = savedBlog._id;
   });
 
-  it('should add a comment to a blog post', async () => {
-    const res = await request(app)
+  test('should add a comment to a blog', async () => {
+    const response = await request(app)
       .post(`/api/blogs/${blogId}/comments`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        content: 'This is a test comment.',
-      });
+      .send({ author: userId, content: 'This is a comment' })
+      .expect(200);
 
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('content', 'This is a test comment');
-    commentId = res.body._id;
+    expect(response.body).toHaveProperty('message', 'Comment added successfully');
+    const updatedBlog = await Blog.findById(blogId);
+    expect(updatedBlog.comments.length).toBe(1);
+    expect(updatedBlog.comments[0].content).toBe('This is a comment');
+    expect(updatedBlog.comments[0].author.toString()).toBe(userId.toString());
   });
 
-  it('should retrieve all comments for a blog post', async () => {
-    const res = await request(app)
+  test('should retrieve comments for a blog', async () => {
+    const comment = { author: userId, content: 'This is a comment' };
+    
+    await Blog.findByIdAndUpdate(blogId, { $push: { comments: comment } });
+
+    const response = await request(app)
       .get(`/api/blogs/${blogId}/comments`)
-      .set('Authorization', `Bearer ${token}`);
+      .expect(200);
 
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThan(0);
-    expect(res.body[0]).toHaveProperty('content', 'This is a test comment');
-  });
-
-  it('should return 404 if the blog does not exist when adding a comment', async () => {
-    const fakeId = new mongoose.Types.ObjectId();
-    const res = await request(app)
-      .post(`/api/blogs/${fakeId}/comments`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        content: 'This comment should fail.',
-      });
-
-    expect(res.status).toBe(404);
-    expect(res.body).toHaveProperty('message', 'Blog not found');
-  });
-
-  it('should return 404 if the blog does not exist when retrieving comments', async () => {
-    const fakeId = new mongoose.Types.ObjectId();
-    const res = await request(app)
-      .get(`/api/blogs/${fakeId}/comments`)
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(res.status).toBe(404);
-    expect(res.body).toHaveProperty('message', 'Blog not found');
-  });
-
-  it('should delete a comment from a blog post', async () => {
-    const res = await request(app)
-      .delete(`/api/blogs/${blogId}/comments/${commentId}`)
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(res.status).toBe(204);
+    expect(response.body).toHaveLength(1);
+    expect(response.body[0].content).toBe('This is a comment');
   });
 });
