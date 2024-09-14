@@ -1,9 +1,7 @@
-// In like.test.js
-
 const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const app = require('../app'); // Adjust this path if necessary
+const app = require('../index'); // Changed from '../app' to '../index'
 
 let mongoServer;
 let token;
@@ -22,7 +20,7 @@ beforeAll(async () => {
     .send({ username: 'testuser', email: 'test@example.com', password: 'password123' });
   
   const loginResponse = await request(app)
-    .post('/api/login')
+    .post('/api/userLogin') // Changed from '/api/login' to '/api/userLogin'
     .send({ email: 'test@example.com', password: 'password123' });
   
   token = loginResponse.body.token;
