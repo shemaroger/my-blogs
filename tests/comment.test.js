@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const jwt = require('jsonwebtoken');
 const app = require('../index'); // Adjust the path to your Express app
-const Blog = require('../Models/Blog');
+const Blog = require('../Models/Blogs');
 const User = require('../Models/User');
 const Comment = require('../models/Comment'); // Assuming you have a Comment model
 
