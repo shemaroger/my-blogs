@@ -30,8 +30,8 @@ describe('Comment Endpoints', () => {
   let userId;
   
   beforeEach(async () => {
-    // Create a test user with password
-    const user = new User({ email: 'testuser@example.com', password: 'password123' });
+    // Create a test user
+    const user = new User({ name: 'Test User', email: 'testuser@example.com' });
     const savedUser = await user.save();
     userId = savedUser._id;
     
@@ -42,13 +42,12 @@ describe('Comment Endpoints', () => {
   });
 
   test('should add a comment to a blog', async () => {
-    // Simulate logged-in user with JWT or session handling if needed
     const response = await request(app)
       .post(`/api/blogs/${blogId}/comments`)
-      .send({ content: 'This is a comment' }) // No need to send `author`, it's taken from req.user
-      .expect(201);
+      .send({ author: userId, content: 'This is a comment' })
+      .expect(200);
 
-    expect(response.body).toHaveProperty('content', 'This is a comment');
+    expect(response.body).toHaveProperty('message', 'Comment added successfully');
     const updatedBlog = await Blog.findById(blogId);
     expect(updatedBlog.comments.length).toBe(1);
     expect(updatedBlog.comments[0].content).toBe('This is a comment');
