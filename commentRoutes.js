@@ -77,8 +77,8 @@ const { validateAuth } = require('../middleware/authMiddleware');
  *         description: Blog post not found.
  */
 
-router.post('/:blogId/comments', validateAuth, commentController.addComment);
-router.get('/:blogId/comments', commentController.getComments);
+router.post('api/blogs/:blogId/comments', validateAuth, commentController.addComment);
+router.get('api/blogs/:blogId/comments', commentController.getComments);
 
 module.exports = router;
 
