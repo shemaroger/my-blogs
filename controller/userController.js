@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const jwtSecret = 'secret_key0987'; 
 
+userSchema.methods.generateAuthToken = function() {
+  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
+};
 // Middleware to validate user input using Joi
 const Joi = require('joi');
 const schema = Joi.object({
