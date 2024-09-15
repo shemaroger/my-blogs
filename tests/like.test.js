@@ -1,59 +1,36 @@
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const request = require('supertest');
-const app = require('../index');
+const app = require('../app');
 const Blog = require('../Models/Blogs');
+const jwt = require('jsonwebtoken');
 
-let mongoServer;
-let mongoUri;
+jest.mock('../Models/Blogs');
+jest.mock('jsonwebtoken');
 
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  mongoUri = mongoServer.getUri();
-  
-  await mongoose.connect(mongoUri);
-});
+describe('Likes API', () => {
+  const mockBlog = { _id: 'blogId', likes: ['userId'] };
 
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
-
-describe('Like Endpoints', () => {
-  let blogId;
-  
-  beforeEach(async () => {
-    const blog = new Blog({ title: 'Test Blog', content: 'This is a test blog', author: 'testauthor' });
-    const savedBlog = await blog.save();
-    blogId = savedBlog._id;
+  beforeEach(() => {
+    Blog.findById.mockResolvedValue(mockBlog);
+    jwt.verify.mockResolvedValue({ _id: 'userId' });
   });
 
-  test('should like a blog', async () => {
-    const userId = new mongoose.Types.ObjectId(); // Use 'new' keyword here
+  describe('POST /blogs/:id/like', () => {
+    it('should toggle like for a blog post', async () => {
+      const token = 'Bearer validToken';
+      
+      const response = await request(app)
+        .post(`/blogs/${mockBlog._id}/like`)
+        .set('Authorization', token);
 
-    const response = await request(app)
-      .post(`/api/blogs/${blogId}/likes`)
-      .send({ userId })
-      .expect(200);
+      expect(response.status).toBe(200);
+      expect(Blog.findById).toHaveBeenCalledWith(mockBlog._id);
+      expect(response.body.includes('userId')).toBe(false); // Because the like will be removed
+    });
 
-    expect(response.body).toHaveProperty('message', 'Blog liked successfully');
-    const updatedBlog = await Blog.findById(blogId);
-    expect(updatedBlog.likes).toContain(userId.toString());
-  });
-
-  test('should not like a blog twice by the same user', async () => {
-    const userId = new mongoose.Types.ObjectId(); // Use 'new' keyword here
-
-    await request(app)
-      .post(`/api/blogs/${blogId}/likes`)
-      .send({ userId })
-      .expect(200);
-
-    const response = await request(app)
-      .post(`/api/blogs/${blogId}/likes`)
-      .send({ userId })
-      .expect(400);
-
-    expect(response.body).toHaveProperty('error', 'User already liked this blog');
+    it('should return 404 if blog not found', async () => {
+      Blog.findById.mockResolvedValue(null);
+      const response = await request(app).post(`/blogs/invalidId/like`);
+      expect(response.status).toBe(404);
+    });
   });
 });

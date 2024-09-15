@@ -1,66 +1,51 @@
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const request = require('supertest');
-const app = require('../index');
+const app = require('../app');
 const Blog = require('../Models/Blogs');
-const User = require('../Models/User');
+const jwt = require('jsonwebtoken');
 
-let mongoServer;
-let mongoUri;
+jest.mock('../Models/Blogs');
+jest.mock('jsonwebtoken');
 
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  mongoUri = mongoServer.getUri();
-  
-  await mongoose.connect(mongoUri);
-});
+describe('Comments API', () => {
+  const mockBlog = { _id: 'blogId', comments: [] };
 
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
+  beforeEach(() => {
+    Blog.findById.mockResolvedValue(mockBlog);
+    jwt.verify.mockResolvedValue({ _id: 'userId' });
+  });
 
-describe('Comment Endpoints', () => {
-  let blogId;
-  let userId;
-  
-  beforeEach(async () => {
-    const user = new User({
-      name: 'Test User',
-      email: 'testuser@example.com',
-      password: 'testpassword123'
+  describe('POST /blogs/:id/comments', () => {
+    it('should add a comment to a blog', async () => {
+      const comment = { content: 'This is a great post!' };
+      const token = 'Bearer validToken';
+      
+      const response = await request(app)
+        .post(`/blogs/${mockBlog._id}/comments`)
+        .set('Authorization', token)
+        .send(comment);
+
+      expect(response.status).toBe(201);
+      expect(Blog.findById).toHaveBeenCalledWith(mockBlog._id);
+      expect(response.body.content).toBe(comment.content);
     });
-    const savedUser = await user.save();
-    userId = savedUser._id;
-    
-    const blog = new Blog({ title: 'Test Blog', content: 'This is a test blog', author: 'testauthor' });
-    const savedBlog = await blog.save();
-    blogId = savedBlog._id;
+
+    it('should return 404 if blog not found', async () => {
+      Blog.findById.mockResolvedValue(null);
+      const response = await request(app).post(`/blogs/invalidId/comments`).send({ content: 'Nice!' });
+      expect(response.status).toBe(404);
+    });
   });
 
-  test('should add a comment to a blog', async () => {
-    const response = await request(app)
-      .post(`/api/blogs/${blogId}/comments`)
-      .send({ author: userId, content: 'This is a comment' })
-      .expect(201);
+  describe('GET /blogs/:id/comments', () => {
+    it('should return all comments for a blog', async () => {
+      const response = await request(app).get(`/blogs/${mockBlog._id}/comments`);
+      expect(response.status).toBe(200);
+    });
 
-    expect(response.body).toHaveProperty('message', 'Comment added successfully');
-    const updatedBlog = await Blog.findById(blogId);
-    expect(updatedBlog.comments.length).toBe(1);
-    expect(updatedBlog.comments[0].content).toBe('This is a comment');
-    expect(updatedBlog.comments[0].author.toString()).toBe(userId.toString());
-  });
-
-  test('should retrieve comments for a blog', async () => {
-    const comment = { author: userId, content: 'This is a comment' };
-    
-    await Blog.findByIdAndUpdate(blogId, { $push: { comments: comment } });
-
-    const response = await request(app)
-      .get(`/api/blogs/${blogId}/comments`)
-      .expect(200);
-
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0].content).toBe('This is a comment');
+    it('should return 404 if blog not found', async () => {
+      Blog.findById.mockResolvedValue(null);
+      const response = await request(app).get(`/blogs/invalidId/comments`);
+      expect(response.status).toBe(404);
+    });
   });
 });

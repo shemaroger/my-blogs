@@ -1,45 +1,92 @@
 const express = require('express');
 const router = express.Router();
-const likeController = require('../controller/likeController');
-const { validateAuth } = require('../middleware/authMiddleware');
+const validateAuth = require('./middleware/validateAuth'); // middleware for authentication
+
+// Import controllers
+const { toggleLike } = require('./controller/likeController');
 
 /**
  * @swagger
- * /{blogId}/likes:
+ * /blogs/{id}/comments:
  *   post:
- *     summary: Toggle like or unlike a specific blog post
+ *     summary: Add a comment to a blog
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog ID to which the comment is being added
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: Comment content
+ *                 example: "This is a great blog!"
+ *     responses:
+ *       201:
+ *         description: Comment added successfully
+ *       404:
+ *         description: Blog not found
+ *       500:
+ *         description: Server error
+ */
+router.post('/blogs/:id/comments', validateAuth, addComment);
+
+/**
+ * @swagger
+ * /blogs/{id}/comments:
+ *   get:
+ *     summary: Get all comments for a blog
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog ID to retrieve comments for
+ *     responses:
+ *       200:
+ *         description: A list of comments
+ *       404:
+ *         description: Blog not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/blogs/:id/comments', getComments);
+
+/**
+ * @swagger
+ * /blogs/{id}/like:
+ *   post:
+ *     summary: Toggle a like on a blog post
  *     tags: [Likes]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: blogId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: The unique identifier for the blog post
+ *         description: Blog ID to like/unlike
  *     responses:
  *       200:
- *         description: Like status successfully toggled.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 liked:
- *                   type: boolean
- *                   description: Indicates if the blog post is liked (true) or unliked (false).
- *                 message:
- *                   type: string
- *                   description: Success message.
- *       400:
- *         description: Invalid input or request data.
- *       401:
- *         description: Unauthorized request.
+ *         description: Successfully toggled like
  *       404:
- *         description: Blog post not found.
+ *         description: Blog not found
+ *       500:
+ *         description: Server error
  */
-
-router.post('/blogs/:blogId/likes', validateAuth, likeController.toggleLike);
+router.post('/blogs/:id/like', validateAuth, toggleLike);
 
 module.exports = router;

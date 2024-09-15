@@ -1,84 +1,66 @@
 const express = require('express');
 const router = express.Router();
-const commentController = require('../controller/commentController');
-const { validateAuth } = require('../middleware/authMiddleware');
+const validateAuth = require('./middleware/validateAuth'); // middleware for authentication
+
+// Import controllers
+const { addComment, getComments } = require('./controller/commentController');
 
 /**
  * @swagger
- * /{blogId}/comments:
+ * /blogs/{id}/comments:
  *   post:
- *     summary: Add a comment to a specific blog post
+ *     summary: Add a comment to a blog
  *     tags: [Comments]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: blogId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: The unique identifier for the blog post
+ *         description: Blog ID to which the comment is being added
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - content
  *             properties:
  *               content:
  *                 type: string
- *                 description: The content of the comment
+ *                 description: Comment content
+ *                 example: "This is a great blog!"
  *     responses:
  *       201:
- *         description: Comment successfully added.
- *       400:
- *         description: Invalid input data.
- *       401:
- *         description: Unauthorized request.
+ *         description: Comment added successfully
  *       404:
- *         description: Blog post not found.
+ *         description: Blog not found
+ *       500:
+ *         description: Server error
  */
+router.post('/blogs/:id/comments', validateAuth, addComment);
 
 /**
  * @swagger
- * /{blogId}/comments:
+ * /blogs/{id}/comments:
  *   get:
- *     summary: Retrieve all comments for a specific blog post
+ *     summary: Get all comments for a blog
  *     tags: [Comments]
  *     parameters:
  *       - in: path
- *         name: blogId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: The unique identifier for the blog post
+ *         description: Blog ID to retrieve comments for
  *     responses:
  *       200:
- *         description: A list of comments for the specified blog post.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   content:
- *                     type: string
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                   author:
- *                     type: string
+ *         description: A list of comments
  *       404:
- *         description: Blog post not found.
+ *         description: Blog not found
+ *       500:
+ *         description: Server error
  */
-
-router.post('/blogs/:id/comments', validateAuth, commentController.addComment);
-router.get('/blogs/:id/comments', commentController.getComments);
-
+router.get('/blogs/:id/comments', getComments);
 module.exports = router;
-
