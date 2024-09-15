@@ -28,11 +28,15 @@ describe('Comment API', () => {
     const res = await request(app)
       .post(`/api/blogs/${blog._id}/comments`)
       .send({ content: 'Great post!' });
+
     expect(res.status).toBe(200);
   });
 
   it('should get all comments for a blog post', async () => {
-    const res = await request(app).get(`/api/blogs/${blog._id}/comments`);
+    const res = await request(app)
+      .get(`/api/blogs/${blog._id}/comments`);
+
     expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
   });
 });

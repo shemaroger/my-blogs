@@ -25,7 +25,7 @@ describe('Like API', () => {
     const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
     // Assuming token generation is required
-    const token = user.generateAuthToken(); // Adjust based on your actual token generation method
+    const token = user.generateAuthToken(); // Ensure this function exists and works correctly
 
     const res = await request(app)
       .post(`/api/blogs/${blog._id}/like`)
@@ -34,13 +34,13 @@ describe('Like API', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Like status updated');
-  }, 20000); // Set the timeout to 20 seconds (20000 ms)
+  }, 20000);
 
   it('should unlike a blog post', async () => {
     const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
     const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
-    const token = user.generateAuthToken(); // Adjust based on your actual token generation method
+    const token = user.generateAuthToken();
 
     await request(app)
       .post(`/api/blogs/${blog._id}/like`)
@@ -54,5 +54,5 @@ describe('Like API', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Like status updated');
-  }, 20000); // Set the timeout to 20 seconds (20000 ms)
+  }, 20000);
 });
