@@ -1,5 +1,6 @@
+// tests/like.test.js
 const request = require('supertest');
-const app = require('../index');
+const app = require('../index'); // Your app entry point
 const Blog = require('../Models/Blogs');
 const User = require('../Models/User');
 const mongoose = require('mongoose');
@@ -24,8 +25,8 @@ describe('Like API', () => {
     const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
     const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
-    // Assuming token generation is required
-    const token = user.generateAuthToken(); // Ensure this function exists and works correctly
+    // Generate token
+    const token = user.generateAuthToken();
 
     const res = await request(app)
       .post(`/api/blogs/${blog._id}/like`)
@@ -34,12 +35,13 @@ describe('Like API', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Like status updated');
-  }, 20000);
+  });
 
   it('should unlike a blog post', async () => {
     const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
     const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
+    // Generate token
     const token = user.generateAuthToken();
 
     await request(app)
@@ -54,5 +56,5 @@ describe('Like API', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Like status updated');
-  }, 20000);
+  });
 });
