@@ -1,7 +1,7 @@
 const Blog = require('../Models/Blogs');
 exports.toggleLike = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.blogId);
+    const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
 
     const userId = req.user._id.toString();

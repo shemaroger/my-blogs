@@ -2,7 +2,7 @@ const Blog = require('../Models/Blogs');
 
 exports.addComment = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.blogId);
+    const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
 
     const comment = {
@@ -20,7 +20,7 @@ exports.addComment = async (req, res) => {
 
 exports.getComments = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.blogId);
+    const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
 
     res.json(blog.comments);
