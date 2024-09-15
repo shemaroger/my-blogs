@@ -1,30 +1,38 @@
 const Blog = require('../Models/Blogs');
+const Joi = require('joi');
 
+const commentSchema = Joi.object({
+    content: Joi.string().required(),
+    author: Joi.string().required(),
+});
+
+// Add a comment to a blog post
 exports.addComment = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
+    const { error } = commentSchema.validate(req.body);
+    if (error) return res.status(400).send({ error: error.details[0].message });
 
-    const comment = {
-      author: req.user._id,
-      content: req.body.content
-    };
+    try {
+        const { content, author } = req.body;
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({ error: 'Blog not found' });
 
-    blog.comments.push(comment);
-    const updatedBlog = await blog.save();
-    res.status(201).json(updatedBlog.comments[updatedBlog.comments.length - 1]);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+        blog.comments.push({ content, author });
+        await blog.save();
+
+        res.status(201).json({ message: 'Comment added successfully', blog });
+    } catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };
 
+// Get all comments for a blog
 exports.getComments = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
+    try {
+        const blog = await Blog.findById(req.params.id).populate('comments.author', 'email');
+        if (!blog) return res.status(404).json({ error: 'Blog not found' });
 
-    res.json(blog.comments);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+        res.status(200).json(blog.comments);
+    } catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };

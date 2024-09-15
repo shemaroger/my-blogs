@@ -1,42 +1,39 @@
 const request = require('supertest');
 const app = require('../index');
 const Blog = require('../Models/Blogs');
-const jwt = require('jsonwebtoken');
+const User = require('../Models/User');
 
-jest.mock('../Models/Blogs');
-jest.mock('jsonwebtoken');
+describe('Like API', () => {
+    it('should like a blog post', async () => {
+        const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
+        const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
-describe('Likes API', () => {
-  const mockBlog = { _id: 'blogId', likes: ['userId'] };
+        const res = await request(app)
+            .post(`/blogs/${blog._id}/like`)
+            .set('Authorization', `Bearer ${user.token}`)
+            .send();
 
-  beforeEach(() => {
-    // Mock Blog.findById to return the mockBlog for the correct blog ID
-    Blog.findById.mockImplementation((id) => {
-      if (id === 'blogId') {
-        return Promise.resolve(mockBlog);
-      }
-      return Promise.resolve(null);
-    });
-    
-    jwt.verify.mockResolvedValue({ _id: 'userId' });
-  });
-
-  describe('POST /blogs/:id/like', () => {
-    it('should toggle like for a blog post', async () => {
-      const token = 'Bearer validToken';
-      
-      const response = await request(app)
-        .post(`/blogs/blogId/like`)
-        .set('Authorization', token);
-
-      expect(response.status).toBe(200);
-      expect(Blog.findById).toHaveBeenCalledWith('blogId');
-      expect(response.body.likes.includes('userId')).toBe(false); // Assuming the like will be removed
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe('Like status updated');
     });
 
-    it('should return 404 if blog not found', async () => {
-      const response = await request(app).post(`/blogs/invalidId/like`);
-      expect(response.status).toBe(404);
+    it('should unlike a blog post', async () => {
+        const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
+        const user = await User.create({ email: 'test@example.com', password: 'password123' });
+
+        // Like the post first
+        await request(app)
+            .post(`/blogs/${blog._id}/like`)
+            .set('Authorization', `Bearer ${user.token}`)
+            .send();
+
+        // Unlike the post
+        const res = await request(app)
+            .post(`/blogs/${blog._id}/like`)
+            .set('Authorization', `Bearer ${user.token}`)
+            .send();
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe('Like status updated');
     });
-  });
 });

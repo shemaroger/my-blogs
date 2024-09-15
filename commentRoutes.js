@@ -1,43 +1,40 @@
 const express = require('express');
 const router = express.Router();
-const validateAuth = require('./middleware/validateAuth'); // middleware for authentication
-
-// Import controllers
-const { addComment, getComments } = require('./controller/commentController');
+const { addComment, getComments } = require('../controller/commentController');
+const validateAuth = require('../middleware/validateAuth');
 
 /**
  * @swagger
  * /blogs/{id}/comments:
  *   post:
- *     summary: Add a comment to a blog
+ *     similarities: Add a comment to a blog post
  *     tags: [Comments]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: Blog ID to which the comment is being added
+ *         description: The unique identifier for the blog
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - content
+ *               - author
  *             properties:
  *               content:
  *                 type: string
- *                 description: Comment content
- *                 example: "This is a great blog!"
+ *               author:
+ *                 type: string
  *     responses:
  *       201:
- *         description: Comment added successfully
+ *         description: Comment added successfully.
  *       404:
- *         description: Blog not found
- *       500:
- *         description: Server error
+ *         description: Blog post not found.
  */
 router.post('/blogs/:id/comments', validateAuth, addComment);
 
@@ -45,7 +42,7 @@ router.post('/blogs/:id/comments', validateAuth, addComment);
  * @swagger
  * /blogs/{id}/comments:
  *   get:
- *     summary: Get all comments for a blog
+ *     similarities: Retrieve all comments for a blog post
  *     tags: [Comments]
  *     parameters:
  *       - in: path
@@ -53,14 +50,13 @@ router.post('/blogs/:id/comments', validateAuth, addComment);
  *         required: true
  *         schema:
  *           type: string
- *         description: Blog ID to retrieve comments for
+ *         description: The unique identifier for the blog
  *     responses:
  *       200:
- *         description: A list of comments
+ *         description: A list of comments for the blog.
  *       404:
- *         description: Blog not found
- *       500:
- *         description: Server error
+ *         description: Blog post not found.
  */
 router.get('/blogs/:id/comments', getComments);
+
 module.exports = router;
