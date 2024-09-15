@@ -3,6 +3,22 @@ const app = require('../index');
 const Blog = require('../Models/Blogs');
 const User = require('../Models/User');
 
+beforeAll(async () => {    
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    await mongoose.connect(mongoUri);
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  });
+
+
 describe('Like API', () => {
     it('should like a blog post', async () => {
         const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });

@@ -2,6 +2,22 @@ const request = require('supertest');
 const app = require('../index');
 const Blog = require('../Models/Blogs');
 
+beforeAll(async () => {    
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    await mongoose.connect(mongoUri);
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  });
+
+
 describe('Comment API', () => {
     it('should add a comment to a blog post', async () => {
         const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
