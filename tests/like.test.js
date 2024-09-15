@@ -10,7 +10,14 @@ describe('Likes API', () => {
   const mockBlog = { _id: 'blogId', likes: ['userId'] };
 
   beforeEach(() => {
-    Blog.findById.mockResolvedValue(mockBlog);
+    // Mock Blog.findById to return the mockBlog for the correct blog ID
+    Blog.findById.mockImplementation((id) => {
+      if (id === 'blogId') {
+        return Promise.resolve(mockBlog);
+      }
+      return Promise.resolve(null);
+    });
+    
     jwt.verify.mockResolvedValue({ _id: 'userId' });
   });
 
@@ -19,16 +26,15 @@ describe('Likes API', () => {
       const token = 'Bearer validToken';
       
       const response = await request(app)
-        .post(`/blogs/${mockBlog._id}/like`)
+        .post(`/blogs/blogId/like`)
         .set('Authorization', token);
 
       expect(response.status).toBe(200);
-      expect(Blog.findById).toHaveBeenCalledWith(mockBlog._id);
-      expect(response.body.includes('userId')).toBe(false); // Because the like will be removed
+      expect(Blog.findById).toHaveBeenCalledWith('blogId');
+      expect(response.body.likes.includes('userId')).toBe(false); // Assuming the like will be removed
     });
 
     it('should return 404 if blog not found', async () => {
-      Blog.findById.mockResolvedValue(null);
       const response = await request(app).post(`/blogs/invalidId/like`);
       expect(response.status).toBe(404);
     });

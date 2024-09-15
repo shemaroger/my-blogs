@@ -10,7 +10,14 @@ describe('Comments API', () => {
   const mockBlog = { _id: 'blogId', comments: [] };
 
   beforeEach(() => {
-    Blog.findById.mockResolvedValue(mockBlog);
+    // Mock Blog.findById to return the mockBlog for the correct blog ID
+    Blog.findById.mockImplementation((id) => {
+      if (id === 'blogId') {
+        return Promise.resolve(mockBlog);
+      }
+      return Promise.resolve(null);
+    });
+    
     jwt.verify.mockResolvedValue({ _id: 'userId' });
   });
 
@@ -20,12 +27,12 @@ describe('Comments API', () => {
       const token = 'Bearer validToken';
       
       const response = await request(app)
-        .post(`/blogs/${mockBlog._id}/comments`)
+        .post(`/blogs/blogId/comments`)
         .set('Authorization', token)
         .send(comment);
 
       expect(response.status).toBe(201);
-      expect(Blog.findById).toHaveBeenCalledWith(mockBlog._id);
+      expect(Blog.findById).toHaveBeenCalledWith('blogId');
       expect(response.body.content).toBe(comment.content);
     });
 
@@ -38,7 +45,7 @@ describe('Comments API', () => {
 
   describe('GET /blogs/:id/comments', () => {
     it('should return all comments for a blog', async () => {
-      const response = await request(app).get(`/blogs/${mockBlog._id}/comments`);
+      const response = await request(app).get(`/blogs/blogId/comments`);
       expect(response.status).toBe(200);
     });
 
