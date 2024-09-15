@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const routes1 = require("./userRoutes");
 const routes2 = require("./blogRoutes");
-const routes3 = require("./likeRoutes");
-const routes4 = require("./commentRoutes");
 
 const passport = require('passport');
 const express = require('express');
@@ -56,8 +54,7 @@ app.use(passport.initialize());
 // Routes
 app.use('/api', routes1);
 app.use('/api', routes2);
-app.use('/api', routes3);
-app.use('/api', routes4);
+
 
 // Swagger documentation route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
