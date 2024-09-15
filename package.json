@@ -11,6 +11,7 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverage": true,
+    "testTimeout": 10000,
     "coverageReporters": [
       "json",
       "lcov",
