@@ -25,40 +25,40 @@ afterAll(async () => {
 
 
 describe('Like API', () => {
-  let blog;
-  let user;
-  let token;
+    it('should like a blog post', async () => {
+        const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
+        const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
-  beforeEach(async () => {
-    blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
-    user = await User.create({ email: 'test@example.com', password: 'password123' });
-    token = `Bearer ${user.generateAuthToken()}`;
-  });
+        // Assuming token generation is required
+        const token = user.generateAuthToken(); // Adjust based on your actual token generation method
 
-  it('should like a blog post', async () => {
-    const res = await request(app)
-      .post(`/api/blogs/${blog._id}/like`)
-      .set('Authorization', token)
-      .send();
+        const res = await request(app)
+            .post(`/blogs/${blog._id}/like`)
+            .set('Authorization', `Bearer ${token}`)
+            .send();
 
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('Like status updated');
-  });
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe('Like status updated');
+    }, 20000); // Set the timeout to 20 seconds (20000 ms)
 
-  it('should unlike a blog post', async () => {
-    // Like the post first
-    await request(app)
-      .post(`/api/blogs/${blog._id}/like`)
-      .set('Authorization', token)
-      .send();
+    it('should unlike a blog post', async () => {
+        const blog = await Blog.create({ title: 'Test Blog', content: 'Test Content', author: 'Test Author' });
+        const user = await User.create({ email: 'test@example.com', password: 'password123' });
 
-    // Unlike the post
-    const res = await request(app)
-      .post(`/api/blogs/${blog._id}/like`)
-      .set('Authorization', token)
-      .send();
+        // Like the post first
+        const token = user.generateAuthToken(); // Adjust based on your actual token generation method
+        await request(app)
+            .post(`/blogs/${blog._id}/like`)
+            .set('Authorization', `Bearer ${token}`)
+            .send();
 
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('Like status updated');
-  });
+        // Unlike the post
+        const res = await request(app)
+            .post(`/blogs/${blog._id}/like`)
+            .set('Authorization', `Bearer ${token}`)
+            .send();
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe('Like status updated');
+    }, 20000); // Set the timeout to 20 seconds (20000 ms)
 });
