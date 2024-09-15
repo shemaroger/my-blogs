@@ -29,14 +29,21 @@ describe('Comment API', () => {
       .post(`/api/blogs/${blog._id}/comments`)
       .send({ content: 'Great post!' });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201); // Changed from 200 to 201 for resource creation
+    expect(res.body).toHaveProperty('content', 'Great post!');
   });
 
   it('should get all comments for a blog post', async () => {
+    // Add a comment first
+    await request(app)
+      .post(`/api/blogs/${blog._id}/comments`)
+      .send({ content: 'Test comment' });
+
     const res = await request(app)
       .get(`/api/blogs/${blog._id}/comments`);
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
   });
 });
