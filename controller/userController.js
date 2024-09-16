@@ -8,6 +8,7 @@ const Joi = require('joi');
 const schema = Joi.object({
     password: Joi.string().required(),
     email: Joi.string().email().required(),
+    role: Joi.string().valid('admin', 'user').optional()  // Validate role if provided
 });
 
 exports.createUser = async (req, res) => {
@@ -15,9 +16,13 @@ exports.createUser = async (req, res) => {
         const { error } = schema.validate(req.body);
         if (error) return res.status(400).send({ error: error.details[0].message });
 
+        // Set role to 'user' by default if not provided
+        const role = req.body.role || 'user';
+
         const user = new User({
             password: req.body.password,
             email: req.body.email,
+            role: role,
         });
 
         await user.save();
@@ -47,7 +52,7 @@ exports.loginUser = async (req, res) => {
             return res.status(400).send({ error: 'Invalid credentials' });
         }
 
-        const payload = { id: user._id, username: user.username };
+        const payload = { id: user._id, role: user.role };  // Include role in payload if needed
         const token = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
         res.send({ token: `Bearer ${token}` });

@@ -24,11 +24,17 @@ const { createUser, loginUser } = require('./controller/userController');
  *               password:
  *                 type: string
  *                 format: password
+ *               role:
+ *                 type: string
+ *                 enum: [admin, user]
+ *                 default: user
  *     responses:
  *       201:
  *         description: User account successfully created.
  *       400:
  *         description: Invalid input data.
+ *       500:
+ *         description: Error creating user.
  */
 router.post('/users', createUser);
 
@@ -57,10 +63,20 @@ router.post('/users', createUser);
  *     responses:
  *       200:
  *         description: User logged in successfully.
- *       401:
- *         description: Failed login, incorrect credentials.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for authentication
  *       400:
- *         description: Invalid input data.
+ *         description: Invalid input data or user not found.
+ *       401:
+ *         description: Invalid credentials.
+ *       500:
+ *         description: Error logging in.
  */
 router.post('/userLogin', loginUser);
 
