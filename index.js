@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const routes1 = require("./userRoutes");
 const routes2 = require("./blogRoutes");
-
+const routes3 = require("./commentRoutes");  // Uncomment this line
+const routes4 = require("./likeRoutes");
 const passport = require('passport');
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
@@ -11,9 +12,8 @@ const app = express();
 const cors = require('cors');
 
 // Allow requests from any origin (or specify a domain)
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: '*' }));
 
-// Swagger configuration
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -42,7 +42,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./userRoutes.js', './blogRoutes.js', '/commentRoutes.js','likeRoutes.js'], // Paths to the route files
+  apis: ['./userRoutes.js', './blogRoutes.js', './commentRoutes.js','./likeRoutes'], // Removed '/likeRoutes.js' as it's not used
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -54,8 +54,8 @@ app.use(passport.initialize());
 // Routes
 app.use('/api', routes1);
 app.use('/api', routes2);
-
-
+app.use('/api', routes3);  // Add the comment routes
+app.use('/api', routes4);
 // Swagger documentation route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

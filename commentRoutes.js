@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { addComment, getComments } = require('../controller/commentController');
-const validateAuth = require('../middleware/validateAuth');
+const { addComment, getComments } = require('./controller/commentController');
+const validateAuth = require('./middleware/validateAuth');
 
 /**
  * @swagger
  * /blogs/{id}/comments:
  *   post:
- *     similarities: Add a comment to a blog post
+ *     summary: Add a comment to a blog post
  *     tags: [Comments]
  *     parameters:
  *       - in: path
@@ -24,17 +24,21 @@ const validateAuth = require('../middleware/validateAuth');
  *             type: object
  *             required:
  *               - content
- *               - author
  *             properties:
  *               content:
  *                 type: string
- *               author:
- *                 type: string
+ *                 description: The content of the comment
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       201:
  *         description: Comment added successfully.
+ *       400:
+ *         description: Bad request, validation failed.
  *       404:
  *         description: Blog post not found.
+ *       500:
+ *         description: Internal server error.
  */
 router.post('/blogs/:id/comments', validateAuth, addComment);
 
@@ -42,7 +46,7 @@ router.post('/blogs/:id/comments', validateAuth, addComment);
  * @swagger
  * /blogs/{id}/comments:
  *   get:
- *     similarities: Retrieve all comments for a blog post
+ *     summary: Retrieve all comments for a blog post
  *     tags: [Comments]
  *     parameters:
  *       - in: path
@@ -54,8 +58,23 @@ router.post('/blogs/:id/comments', validateAuth, addComment);
  *     responses:
  *       200:
  *         description: A list of comments for the blog.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   author:
+ *                     type: string
+ *                     description: The author's user ID
+ *                   content:
+ *                     type: string
+ *                     description: The content of the comment
  *       404:
  *         description: Blog post not found.
+ *       500:
+ *         description: Internal server error.
  */
 router.get('/blogs/:id/comments', getComments);
 

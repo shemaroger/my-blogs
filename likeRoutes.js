@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { toggleLike } = require('../controller/likeController');
-const validateAuth = require('../middleware/validateAuth');
+const { toggleLike } = require('./controller/likeController');
+const validateAuth = require('./middleware/validateAuth');
 
 /**
  * @swagger
