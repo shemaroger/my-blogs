@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
         
         // Attach user information to the request object
         req.user = {
-            id: decoded.id,
+            _id: decoded.id,       // Use `_id` to match controller expectations
             username: decoded.username  // Adjust according to the payload structure
         };
         

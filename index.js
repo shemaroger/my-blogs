@@ -42,7 +42,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./userRoutes.js', './blogRoutes.js', './commentRoutes.js','./likeRoutes'], // Removed '/likeRoutes.js' as it's not used
+  apis: ['./userRoutes.js', './blogRoutes.js', './commentRoutes.js','./likeRoutes.js'], // Removed '/likeRoutes.js' as it's not used
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
