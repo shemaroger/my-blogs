@@ -34,3 +34,19 @@ exports.toggleLike = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+// Function to get the number of likes for a specific blog post
+exports.getLikesCount = async (req, res) => {
+    try {
+        // Find the blog post by ID
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+
+        // Send response with the number of likes
+        res.status(200).json({ likes: blog.likes.length });
+    } catch (err) {
+        console.error('Error getting likes count:', err.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
