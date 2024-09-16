@@ -28,28 +28,38 @@
 //     }
 // };
 
-const jwt = require('jsonwebtoken'); // Assuming you're using JWT
 
-// Middleware to validate token
-const validateAuth = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    
-    // Ensure that the token exists in the Authorization header
+const jwt = require('jsonwebtoken');
+
+// Middleware to validate JWT tokens
+module.exports = (req, res, next) => {
+    // Extract the token from the Authorization header (e.g., "Bearer <token>")
+    const authHeader = req.headers['authorization'];
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Authorization header missing or malformed' });
+        return res.status(401).json({ error: 'Authorization header missing or malformed' });
     }
 
     const token = authHeader.split(' ')[1];
 
+    if (!token) {
+        return res.status(401).json({ error: 'Token not found' });
+    }
+
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Add the decoded user to the request object
-        console.log('Decoded user:', decoded); // Logging for debugging
+        // Verify the token using the secret key (use environment variable for secret)
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret_key');
+
+        // Attach the user data to the request object, for use in subsequent routes
+        req.user = {
+            _id: decoded.id,        // Assuming the payload contains `id`
+            username: decoded.username  // Assuming the payload contains `username`
+        };
+
+        // Proceed to the next middleware or route handler
         next();
-    } catch (err) {
-        console.error('Token validation error:', err.message);
-        return res.status(401).json({ message: 'Invalid or expired token' });
+    } catch (error) {
+        // Handle specific JWT errors (expired, malformed, etc.)
+        return res.status(401).json({ error: 'Invalid or expired token' });
     }
 };
-
-module.exports = validateAuth;
