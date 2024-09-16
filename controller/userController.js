@@ -52,10 +52,12 @@ exports.loginUser = async (req, res) => {
             return res.status(400).send({ error: 'Invalid credentials' });
         }
 
-        const payload = { id: user._id, role: user.role };  // Include role in payload if needed
+        // Include the role in the payload
+        const payload = { id: user._id, role: user.role };
         const token = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
-        res.send({ token: `Bearer ${token}` });
+        // Send both token and role in the response
+        res.send({ token: `Bearer ${token}`, role: user.role });
     } catch (error) {
         console.error('Error logging in:', error);
         res.status(500).send({ error: 'Error logging in' });
