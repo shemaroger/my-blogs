@@ -8,6 +8,10 @@ const blogSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+   date: {
+    type: Date,
+    default: Date.now,
+  },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [{
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
