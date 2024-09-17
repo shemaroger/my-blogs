@@ -1,31 +1,26 @@
 const User = require('../Models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const jwtSecret = 'secret_key0987'; 
+
+// Middleware to validate user input using Joi
 const Joi = require('joi');
-
-const jwtSecret = process.env.JWT_SECRET || 'secret_key0987'; // Use environment variable for secret key
-
-// Validation schema
 const schema = Joi.object({
     password: Joi.string().required(),
     email: Joi.string().email().required(),
     role: Joi.string().valid('admin', 'user').optional()  // Validate role if provided
 });
 
-// Create User
 exports.createUser = async (req, res) => {
     try {
         const { error } = schema.validate(req.body);
         if (error) return res.status(400).send({ error: error.details[0].message });
 
-        const existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) return res.status(400).send({ error: 'User with this email already exists' });
-
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        // Set role to 'user' by default if not provided
         const role = req.body.role || 'user';
 
         const user = new User({
-            password: hashedPassword,
+            password: req.body.password,
             email: req.body.email,
             role: role,
         });
@@ -33,13 +28,10 @@ exports.createUser = async (req, res) => {
         await user.save();
         res.status(201).send(user);
     } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).send({ error: 'Error creating user' });
+        res.status(500).send({ error: "Error creating user" });
     }
 };
 
-
-// Login User
 exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -60,11 +52,11 @@ exports.loginUser = async (req, res) => {
             return res.status(400).send({ error: 'Invalid credentials' });
         }
 
-        // Create payload and generate token
+        // Include the role in the payload
         const payload = { id: user._id, role: user.role };
         const token = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
-        // Send token and role in the response
+        // Send both token and role in the response
         res.send({ token: `Bearer ${token}`, role: user.role });
     } catch (error) {
         console.error('Error logging in:', error);
