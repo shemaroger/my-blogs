@@ -18,10 +18,10 @@ exports.createUser = async (req, res) => {
         const { error } = schema.validate(req.body);
         if (error) return res.status(400).send({ error: error.details[0].message });
 
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const existingUser = await User.findOne({ email: req.body.email });
+        if (existingUser) return res.status(400).send({ error: 'User with this email already exists' });
 
-        // Set role to 'user' by default if not provided
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const role = req.body.role || 'user';
 
         const user = new User({
@@ -37,6 +37,7 @@ exports.createUser = async (req, res) => {
         res.status(500).send({ error: 'Error creating user' });
     }
 };
+
 
 // Login User
 exports.loginUser = async (req, res) => {
