@@ -1,26 +1,31 @@
 const User = require('../Models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const jwtSecret = 'secret_key0987'; 
-
-// Middleware to validate user input using Joi
 const Joi = require('joi');
+
+const jwtSecret = process.env.JWT_SECRET || 'secret_key0987'; // Use environment variable for secret key
+
+// Validation schema
 const schema = Joi.object({
     password: Joi.string().required(),
     email: Joi.string().email().required(),
     role: Joi.string().valid('admin', 'user').optional()  // Validate role if provided
 });
 
+// Create User
 exports.createUser = async (req, res) => {
     try {
         const { error } = schema.validate(req.body);
         if (error) return res.status(400).send({ error: error.details[0].message });
 
+        // Hash the password before saving
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
         // Set role to 'user' by default if not provided
         const role = req.body.role || 'user';
 
         const user = new User({
-            password: req.body.password,
+            password: hashedPassword,
             email: req.body.email,
             role: role,
         });
@@ -28,10 +33,12 @@ exports.createUser = async (req, res) => {
         await user.save();
         res.status(201).send(user);
     } catch (error) {
-        res.status(500).send({ error: "Error creating user" });
+        console.error('Error creating user:', error);
+        res.status(500).send({ error: 'Error creating user' });
     }
 };
 
+// Login User
 exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -52,7 +59,7 @@ exports.loginUser = async (req, res) => {
             return res.status(400).send({ error: 'Invalid credentials' });
         }
 
-        // Include role in the payload and send role in response
+        // Create payload and generate token
         const payload = { id: user._id, role: user.role };
         const token = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
