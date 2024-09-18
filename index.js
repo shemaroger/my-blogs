@@ -3,6 +3,7 @@ const routes1 = require("./userRoutes");
 const routes2 = require("./blogRoutes");
 const routes3 = require("./commentRoutes");  // Uncomment this line
 const routes4 = require("./likeRoutes");
+const routes5= require("./adminRoutes") 
 const passport = require('passport');
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
@@ -42,7 +43,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./userRoutes.js', './blogRoutes.js', './commentRoutes.js','./likeRoutes.js'], // Removed '/likeRoutes.js' as it's not used
+  apis: ['./userRoutes.js', './blogRoutes.js', './commentRoutes.js','./likeRoutes.js','./adminRoutes.js'], // Removed '/likeRoutes.js' as it's not used
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -56,6 +57,7 @@ app.use('/api', routes1);
 app.use('/api', routes2);
 app.use('/api', routes3);  // Add the comment routes
 app.use('/api', routes4);
+app.use('/api', routes5)
 // Swagger documentation route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
