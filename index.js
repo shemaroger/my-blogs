@@ -45,7 +45,22 @@ const swaggerOptions = {
   },
   apis: ['./userRoutes.js', './blogRoutes.js', './commentRoutes.js','./likeRoutes.js','./adminRoutes.js'], 
 };
+const multerErrorHandling = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: err.message });
+    } else if (err) {
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+    next();
+};
 
+app.use(multerErrorHandling);
+
+// Global error handling middleware (optional)
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something went wrong!' });
+});
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Middleware
