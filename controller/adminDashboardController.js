@@ -1,4 +1,4 @@
-const Blog = require('../models/blog'); // Adjust the path as necessary
+const Blog = require('../Models/blog'); // Adjust the path as necessary
 
 // Function to get dashboard data
 exports.getDashboardData = async (req, res) => {
