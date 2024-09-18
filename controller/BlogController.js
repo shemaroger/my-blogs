@@ -56,7 +56,7 @@ exports.uploadImageToBlog = async (req, res) => {
         });
     } catch (err) {
         console.error('Error uploading image:', err); // Log any errors
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error', details: err.message });
     }
 };
 
