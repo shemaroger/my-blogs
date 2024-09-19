@@ -22,6 +22,7 @@ exports.createBlog = async (req, res) => {
 };
 
 
+// Upload Image to Blog
 exports.uploadImageToBlog = async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image file uploaded' });
 
@@ -58,7 +59,6 @@ exports.uploadImageToBlog = async (req, res) => {
         res.status(500).json({ error: 'Internal server error', details: err.message });
     }
 };
-
 
 // Get All Blogs
 exports.getBlogs = async (req, res) => {
