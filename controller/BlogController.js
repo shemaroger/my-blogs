@@ -27,27 +27,47 @@ exports.uploadImageToBlog = async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image file uploaded' });
 
     try {
-        console.log('Uploading image from:', req.file.path); // Log the file path
+        console.log('Received image upload request');
+        console.log('File details:', req.file);
 
         // Upload image to Cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, { folder: 'Posts' });
-        console.log('Cloudinary upload result:', result); // Log the Cloudinary result
+        let result;
+        try {
+            result = await cloudinary.uploader.upload(req.file.path, { folder: 'Posts' });
+            console.log('Cloudinary upload result:', result); // Log the Cloudinary result
+        } catch (uploadErr) {
+            console.error('Error uploading to Cloudinary:', uploadErr);
+            return res.status(500).json({ error: 'Failed to upload image to Cloudinary', details: uploadErr.message });
+        }
 
         // Find the post by ID
         const post = await Post.findById(req.params.id);
-        if (!post) return res.status(404).json({ message: 'Post not found' });
+        if (!post) {
+            console.error('Post not found:', req.params.id);
+            return res.status(404).json({ message: 'Post not found' });
+        }
 
         // Update post with image URL and Cloudinary public ID
         post.image = result.secure_url;
         post.public_id = result.public_id;
 
         // Save post with image URL
-        await post.save();
-        console.log('Image URL saved to post:', post.image);
+        try {
+            await post.save();
+            console.log('Image URL saved to post:', post.image);
+        } catch (saveErr) {
+            console.error('Error saving post with image URL:', saveErr);
+            return res.status(500).json({ error: 'Failed to save post with image URL', details: saveErr.message });
+        }
 
         // Remove the file from local uploads folder
-        await fs.unlink(req.file.path);
-        console.log('Local file removed:', req.file.path);
+        try {
+            await fs.unlink(req.file.path);
+            console.log('Local file removed:', req.file.path);
+        } catch (unlinkErr) {
+            console.error('Error removing local file:', unlinkErr);
+            // Log the error but don't return it to avoid interfering with the success response
+        }
 
         res.status(200).json({
             message: 'Image uploaded successfully',
@@ -55,10 +75,11 @@ exports.uploadImageToBlog = async (req, res) => {
             image: post.image,
         });
     } catch (err) {
-        console.error('Error uploading image:', err); // Log any errors
+        console.error('Error in uploadImageToBlog function:', err); // Log the full error
         res.status(500).json({ error: 'Internal server error', details: err.message });
     }
 };
+
 
 // Get All Blogs
 exports.getBlogs = async (req, res) => {
