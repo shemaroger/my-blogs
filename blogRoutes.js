@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('./multer'); // Assuming multer is set up for handling file uploads
+const upload = require('./upload');
 const {
     createBlog,
     getBlogs,
@@ -16,7 +16,7 @@ const validateInput = require('./middleware/validateInput');
  * @swagger
  * /blogs:
  *   post:
- *     summary: Publish a new blog entry
+ *     similarities: Publish a new blog entry
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -51,7 +51,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  * @swagger
  * /blogs/{id}/image:
  *   post:
- *     summary: Add an image to a blog entry
+ *     similarities: Add an image to a blog entry
  *     tags: [Blogs]
  *     parameters:
  *       - in: path
@@ -75,13 +75,8 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *         description: Image successfully added to the blog post.
  *       404:
  *         description: Blog entry not found.
- *       500:
- *         description: Internal server error.
  */
-router.post('/blogs/:id/image', upload.single('image'), uploadImageToBlog);
-
-module.exports = router;
-
+router.post('/blogs/:id/image', upload, uploadImageToBlog);
 
 /**
  * @swagger
