@@ -1,7 +1,5 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-const cloudinary = require('cloudinary').v2;
 
 // Define the allowed file types for image uploads
 const filetypes = /jpeg|jpg|png/;
@@ -9,11 +7,7 @@ const filetypes = /jpeg|jpg|png/;
 // Configure multer for file storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const dir = path.join(__dirname, 'public/uploads');
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
+        cb(null, path.join(__dirname, 'public/uploads')); // Ensure 'public/uploads' exists
     },
     filename: function (req, file, cb) {
         cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`);
@@ -26,13 +20,13 @@ const fileFilter = (req, file, cb) => {
     const mimetype = filetypes.test(file.mimetype);
 
     if (mimetype && extname) {
-        cb(null, true);
+        cb(null, true); // Accept the file
     } else {
         cb(new Error('Invalid file type. Only JPEG, JPG, and PNG files are allowed.'));
     }
 };
 
-// Initialize multer with storage, file size limit, and file type filter
+// Initialize multer with storage and file filter
 const upload = multer({
     storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5 MB
