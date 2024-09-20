@@ -76,7 +76,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *       404:
  *         description: Blog entry not found.
  */
-router.post('/blogs/:id/image', upload, uploadImageToBlog);
+router.post('/blogs/:id/image', upload.single('image'), uploadImageToBlog);
 
 /**
  * @swagger
