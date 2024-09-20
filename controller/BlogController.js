@@ -26,25 +26,19 @@ exports.uploadImageToBlog = async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image file uploaded' });
 
     try {
-        console.log('Uploading image from:', req.file.path); // Log the file path
-
-        // Upload image to Cloudinary
+        console.log('Uploading image from:', req.file.path);
         const result = await cloudinary.uploader.upload(req.file.path, { folder: 'Posts' });
-        console.log('Cloudinary upload result:', result); // Log the Cloudinary result
+        console.log('Cloudinary upload result:', result);
 
-        // Find the post by ID
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ message: 'Post not found' });
 
-        // Update post with image URL and Cloudinary public ID
         post.image = result.secure_url;
         post.public_id = result.public_id;
 
-        // Save post with image URL
         await post.save();
         console.log('Image URL saved to post:', post.image);
 
-        // Remove the file from local uploads folder
         await fs.unlink(req.file.path);
         console.log('Local file removed:', req.file.path);
 
@@ -54,7 +48,7 @@ exports.uploadImageToBlog = async (req, res) => {
             image: post.image,
         });
     } catch (err) {
-        console.error('Error details:', err); // Log detailed error
+        console.error('Error details:', err);
         res.status(500).json({ error: 'Internal server error', details: err.message });
     }
 };

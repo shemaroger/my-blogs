@@ -16,7 +16,7 @@ const validateInput = require('./middleware/validateInput');
  * @swagger
  * /blogs:
  *   post:
- *     similarities: Publish a new blog entry
+ *     summary: Publish a new blog entry
  *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
@@ -51,7 +51,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  * @swagger
  * /blogs/{id}/image:
  *   post:
- *     similarities: Add an image to a blog entry
+ *     summary: Add an image to a blog entry
  *     tags: [Blogs]
  *     parameters:
  *       - in: path
@@ -73,10 +73,14 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *     responses:
  *       200:
  *         description: Image successfully added to the blog post.
+ *       400:
+ *         description: No image file uploaded or invalid file type.
  *       404:
  *         description: Blog entry not found.
+ *       500:
+ *         description: Internal server error.
  */
-router.post('/blogs/:id/image', upload, uploadImageToBlog);
+router.post('/blogs/:id/image', upload.single('image'), uploadImageToBlog);
 
 /**
  * @swagger
