@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = require('./multer');
 const {
     createBlog,
     getBlogs,
@@ -81,7 +80,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *       500:
  *         description: Internal server error.
  */
-router.post('/blogs/:id/image', validateAuth, upload.single('image'), uploadImageToBlog);
+router.post('/blogs/:id/image', validateAuth, upload, uploadImageToBlog);
 
 /**
  * @swagger
