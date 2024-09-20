@@ -80,7 +80,7 @@ router.post('/blogs', validateAuth, validateInput, createBlog);
  *       500:
  *         description: Internal server error.
  */
-router.post('/blogs/:id/image', upload.single('image'), uploadImageToBlog);
+router.post('/blogs/:id/image', upload, uploadImageToBlog);
 
 /**
  * @swagger
