@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addComment, getComments } = require('./controller/commentController');
+const { addComment, getComments, countComments } = require('./controller/commentController');
 const validateAuth = require('./middleware/validateAuth');
 
 /**
@@ -77,5 +77,36 @@ router.post('/blogs/:id/comments', validateAuth, addComment);
  *         description: Internal server error.
  */
 router.get('/blogs/:id/comments', getComments);
+
+/**
+ * @swagger
+ * /blogs/{id}/comments/count:
+ *   get:
+ *     summary: Count comments for a blog post
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier for the blog
+ *     responses:
+ *       200:
+ *         description: The count of comments for the blog.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 commentCount:
+ *                   type: integer
+ *                   description: The total number of comments
+ *       404:
+ *         description: Blog post not found.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get('/blogs/:id/comments/count', countComments);
 
 module.exports = router;
